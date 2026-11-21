@@ -1,0 +1,3 @@
+on(press){
+   missionChangeDifficulty("normal");
+}

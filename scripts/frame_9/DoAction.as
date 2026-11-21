@@ -1,0 +1,12 @@
+SwainAudioPlayer.init();
+var keyManger = attachMovie("key_manager","keyManager",420);
+KeyManager.addKey("key_action",81);
+KeyManager.addKey("key_guard",32);
+KeyManager.addKey("key_reload",82);
+KeyManager.addKey("key_down",83);
+KeyManager.addKey("key_up",87);
+KeyManager.addKey("key_left",65);
+KeyManager.addKey("key_right",68);
+KeyManager.addKey("key_pickup",69);
+KeyManager.addKey("key_slowmo",16);
+KeyManager.lockKeys();

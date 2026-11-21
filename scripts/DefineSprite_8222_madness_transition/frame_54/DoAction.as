@@ -1,0 +1,1 @@
+SwainAudioPlayer.stopSound("static");

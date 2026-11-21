@@ -1,0 +1,4 @@
+function createWound(inNumber)
+{
+}
+stop();

@@ -1,0 +1,2 @@
+nextFrame();
+onEnterFrame = null;
