@@ -407,6 +407,8 @@ class MadnessParticle extends MovieClip
             this.finished = true;
             this.cacheAsBitmap = true;
             this.killMe("bmpBodies");
+            // 23/11/2026 dyzqy: No need to run the rest when it has already been deleted!
+            return;
          }
       }
       if(!this.finished && (this.amDangerous || this.myCategory == "projectile"))
@@ -560,7 +562,13 @@ class MadnessParticle extends MovieClip
             // 22/11/2026 dyzqy: This only needs to run once, not every frame! Moved it from amDead to here...
             this.logPositioning();
          }
-         else if(this.myCategory != "sparks")
+         else if(this.myCategory == "sparks")
+         {
+            // 23/112026 dyzqy: Deleting enterframe stuff
+            delete this.onEnterFrame;
+            this.removeMovieClip();
+         }
+         else
          {
             this._parent.drawToBitmap(this,inDestination);
             this.removeMovieClip();

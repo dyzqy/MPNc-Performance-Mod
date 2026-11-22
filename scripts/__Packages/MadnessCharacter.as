@@ -3919,12 +3919,14 @@ class MadnessCharacter extends MovieClip
             _loc11_ = 0;
             while(_loc11_ < MadnessCharacter.allRosters.length)
             {
-               if(MadnessCharacter.allRosters[_loc11_].teamFaction != this.myFaction)
+               // TODO: Figure out how to approprietly name this thing
+               var thing = MadnessCharacter.allRosters[_loc11_];
+               if(thing.teamFaction != this.myFaction)
                {
                   _loc13_ = 0;
-                  while(_loc13_ < MadnessCharacter.allRosters[_loc11_].myActiveMembers.length)
+                  while(_loc13_ < thing.myActiveMembers.length)
                   {
-                     this.targetEnemy = MadnessCharacter.allRosters[_loc11_].myActiveMembers[_loc13_].mySprite;
+                     this.targetEnemy = thing.myActiveMembers[_loc13_].mySprite;
                      if(this.targetEnemy.myFaction != this.myFaction && this.targetEnemy._x != undefined && !this.targetEnemy.amDodging && this.targetEnemy.myStatus != "recover" && (this.targetEnemy.amPlayer || this.aimTimer == -1))
                      {
                         var _loc8_ = undefined;
@@ -3947,7 +3949,8 @@ class MadnessCharacter extends MovieClip
                                  {
                                     if(!this.targetEnemy.deadMan && this.targetEnemy.myStatus.substr(0,3) != "use" && this.targetEnemy.myStatus != "knockback")
                                     {
-                                       if(this.targetX < this.targetEnemy._x + this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100) && this.targetX > this.targetEnemy._x - this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100))
+                                       // 23/11/2026 dyzqy: Fixed width calculations
+                                       if(this.targetX < this.targetEnemy._x + this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100) * 0.5 && this.targetX > this.targetEnemy._x - this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100) * 0.5)
                                        {
                                           if(this.targetY < this.targetEnemy._y && this.targetY > this.targetEnemy._y - this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100))
                                           {
@@ -3955,11 +3958,8 @@ class MadnessCharacter extends MovieClip
                                              _loc3_.x = this.targetX;
                                              _loc3_.y = this.targetY;
                                              this._parent.localToGlobal(_loc3_);
-                                             if((this.targetEnemy.headDamage <= 3 && !this.targetEnemy.myDataRef.bulletEater || this.targetEnemy.myDataRef.bulletEater) && this.targetEnemy.mySprite.myHead.myHit.hitTest(_loc3_.x,_loc3_.y,true))
-                                             {
-                                                _loc12_ = true;
-                                             }
-                                             if(_loc12_ || this.targetEnemy.mySprite.myBody.myHit.hitTest(_loc3_.x,_loc3_.y,true))
+                                             // 23/11/2026 dyzqy: Check the bounding box BEFORE checking the actual bounds
+                                             if(this.targetEnemy.mySprite.hitTest(_loc3_.x,_loc3_.y,false) && ((this.targetEnemy.headDamage <= 3 || this.targetEnemy.myDataRef.bulletEater) && (_loc12_ = this.targetEnemy.mySprite.myHead.myHit.hitTest(_loc3_.x,_loc3_.y,true)) || this.targetEnemy.mySprite.myBody.myHit.hitTest(_loc3_.x,_loc3_.y,true)))
                                              {
                                                 var _loc18_ = SwainMath.randomNumber(0,99999);
                                                 if(_loc2_.melee)
@@ -4156,6 +4156,7 @@ class MadnessCharacter extends MovieClip
                      }
                      _loc13_ = _loc13_ + 1;
                   }
+                  // trace("Has done this this many times!" + _loc13_);
                }
                if(_loc6_)
                {
@@ -4163,6 +4164,7 @@ class MadnessCharacter extends MovieClip
                }
                _loc11_ = _loc11_ + 1;
             }
+            // trace("FATHER OF ABOVE ^ Has done this this many times!" + _loc11_);
             if(!_loc6_)
             {
                this.targetX += this.advanceX;
@@ -4760,7 +4762,7 @@ class MadnessCharacter extends MovieClip
       // 22/1/2026 dyzqy: gotoAndStop is a very expensive call! It is the reason for almost ALL lag in *most* flash games!
       //                  Limit it, contain it, etc.
       //           (TODO) Fix flashing of one of the hands being bugged for the player when going through doors(?) and holding rifles(?)
-      if(!this.setSkinsAlready)
+      if(!inChar.setSkinsAlready)
       {
          handNoneBackCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
          handNoneFrontCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
@@ -4778,7 +4780,7 @@ class MadnessCharacter extends MovieClip
          inChar.mySprite.myHand2.myHand.gotoAndStop(inChar.myDataRef.handType);
          inChar.mySprite.myHand.gotoAndStop(inChar.myDataRef.handType);
          inChar.mySprite.myHand2.gotoAndStop(inChar.myDataRef.handType);
-         this.setSkinsAlready = true;
+         inChar.setSkinsAlready = true;
       }
       if(inChar.blocking)
       {
