@@ -229,11 +229,11 @@ class MadnessDoors extends MovieClip
       _loc2_.myWeapon = _loc2_.myDataRef.myWeapon;
       if(this.myDir == "right" && _loc2_.myMission == "enter" || this.myDir == "left" && _loc2_.myMission == "exit" || this.myDir == "down" && SwainMath.randomNumber(0,1) == 0)
       {
-         _loc2_.myFacing = "right";
+         _loc2_.isFacingRight = true;
       }
       else
       {
-         _loc2_.myFacing = "left";
+         _loc2_.isFacingRight = false;
       }
       if(_loc2_.myMission != "exit")
       {
@@ -270,7 +270,7 @@ class MadnessDoors extends MovieClip
             _loc2_.targetY = _loc5_._y;
          }
       }
-      if(_loc2_.myFacing == "left")
+      if(!_loc2_.isFacingRight)
       {
          _loc2_.myAimX = -5;
       }
@@ -289,7 +289,7 @@ class MadnessDoors extends MovieClip
       _loc2_._xscale = MadnessCharacter.setPerspectiveScale(this._x + _loc2_._x,this._y + _loc2_._y,this._parent.determineRoom(this._x,this._y));
       _loc2_._xscale *= _loc2_.myDataRef.myScale;
       _loc2_._yscale = _loc2_._xscale;
-      if(_loc2_.myFacing == "left")
+      if(!_loc2_.isFacingRight)
       {
          _loc2_._xscale *= -1;
       }
@@ -414,12 +414,12 @@ class MadnessDoors extends MovieClip
          if(inSprite._x < inSprite.targetX - _loc6_)
          {
             inSprite._x += inSprite.myDataRef.mySpeed * _loc8_;
-            inSprite.myFacing = "right";
+            inSprite.isFacingRight = true;
          }
          else if(inSprite._x > inSprite.targetX + _loc6_)
          {
             inSprite._x -= inSprite.myDataRef.mySpeed * _loc8_;
-            inSprite.myFacing = "left";
+            inSprite.isFacingRight = false;
             inSprite._xscale *= -1;
          }
          if(inSprite._y < inSprite.targetY - _loc7_)

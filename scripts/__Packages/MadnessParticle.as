@@ -781,7 +781,7 @@ class MadnessParticle extends MovieClip
          this.lineHookX = _loc2_.x;
          this.lineHookY = _loc2_.y;
          var _loc3_ = undefined;
-         if(this.myThrower.mySprite.myFacing == "right")
+         if(this.myThrower.mySprite.isFacingRight)
          {
             if(this.myThrower.mySprite.mySprite.handShoot_front._visible)
             {

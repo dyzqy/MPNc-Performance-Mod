@@ -77,7 +77,7 @@ class MadnessAI
                      var _loc3_ = 50 + inChar.myDataRef.traitAwareness * 100;
                      if(MadnessCharacter.allRosters[_loc6_].teamFaction != inChar.myFaction)
                      {
-                        if(MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite._x > inChar._x && MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite._x < inChar._x + _loc3_ && (inChar.myFacing == "right" && !inChar.facingOpposite || inChar.myFacing == "left" && inChar.facingOpposite) || MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite._x < inChar._x && MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite._x > inChar._x - _loc3_ && (inChar.myFacing == "left" && !inChar.facingOpposite || inChar.myFacing == "right" && inChar.facingOpposite) || MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite._x > inChar._x - _loc3_ * 1.5 && MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite._x < inChar._x + _loc3_ * 1.5 && MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite.rofTimer < 6 && !MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].myWeapons[MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_]
+                        if(MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite._x > inChar._x && MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite._x < inChar._x + _loc3_ && (inChar.isFacingRight && !inChar.facingOpposite || !inChar.isFacingRight && inChar.facingOpposite) || MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite._x < inChar._x && MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite._x > inChar._x - _loc3_ && (!inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite) || MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite._x > inChar._x - _loc3_ * 1.5 && MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite._x < inChar._x + _loc3_ * 1.5 && MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].mySprite.rofTimer < 6 && !MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_].myWeapons[MadnessCharacter.allRosters[_loc6_].myActiveMembers[_loc5_]
                         .myWeapon].upgradeSilencer)
                         {
                            inChar.myMission = "engage";
@@ -300,7 +300,7 @@ class MadnessAI
                {
                   if(inChar.myDataRef.myWeapons[inChar.myWeapon].melee && (MadnessAI.thisWeapon.melee || MadnessAI.thisWeapon == undefined || !MadnessAI.thisWeapon.melee && MadnessDataFile.havePerk("perkBlock1",inChar.myDataRef)) || !inChar.myDataRef.myWeapons[inChar.myWeapon].melee && MadnessAI.getModdedSkill(inChar,"traitCombatSkill") > 1)
                   {
-                     if(MadnessAI.thisWeapon.melee && MadnessAI.myTarget.inMeleeRange(inChar) && (inChar._x > MadnessAI.myTarget._x && inChar._x < MadnessAI.myTarget._x + MadnessAI.thisWeapon.myRange && MadnessAI.myTarget.myFacing == "right" || inChar._x < MadnessAI.myTarget._x && inChar._x > MadnessAI.myTarget._x - MadnessAI.thisWeapon.myRange && MadnessAI.myTarget.myFacing == "left") || !MadnessAI.thisWeapon.melee && SwainMath.getRotDistance(SwainMath.calculate_rotation(MadnessAI.myTarget._x,MadnessAI.myTarget._y,inChar._x,inChar._y),SwainMath.calculate_rotation(MadnessAI.myTarget._x,MadnessAI.myTarget._y - MadnessAI.myTarget.myDataRef.myShootHeight,MadnessAI.myTarget.myAimX,MadnessAI.myTarget.myAimY)) < 30)
+                     if(MadnessAI.thisWeapon.melee && MadnessAI.myTarget.inMeleeRange(inChar) && (inChar._x > MadnessAI.myTarget._x && inChar._x < MadnessAI.myTarget._x + MadnessAI.thisWeapon.myRange && MadnessAI.myTarget.isFacingRight || inChar._x < MadnessAI.myTarget._x && inChar._x > MadnessAI.myTarget._x - MadnessAI.thisWeapon.myRange && !MadnessAI.myTarget.isFacingRight) || !MadnessAI.thisWeapon.melee && SwainMath.getRotDistance(SwainMath.calculate_rotation(MadnessAI.myTarget._x,MadnessAI.myTarget._y,inChar._x,inChar._y),SwainMath.calculate_rotation(MadnessAI.myTarget._x,MadnessAI.myTarget._y - MadnessAI.myTarget.myDataRef.myShootHeight,MadnessAI.myTarget.myAimX,MadnessAI.myTarget.myAimY)) < 30)
                      {
                         inChar.toggleGuard = true;
                      }
@@ -312,11 +312,11 @@ class MadnessAI
          {
             inChar.toggleGuard = false;
          }
-         if(inChar._x < MadnessAI.myTarget._x && inChar.myFacing == "left" && !inChar.pathFind && SwainMath.randomNumber(0,inChar.traitDistracted * 2) == 0)
+         if(inChar._x < MadnessAI.myTarget._x && !inChar.isFacingRight && !inChar.pathFind && SwainMath.randomNumber(0,inChar.traitDistracted * 2) == 0)
          {
             inChar.moveRight = true;
          }
-         if(inChar._x > MadnessAI.myTarget._x && inChar.myFacing == "right" && !inChar.pathFind && SwainMath.randomNumber(0,inChar.traitDistracted * 2) == 0)
+         if(inChar._x > MadnessAI.myTarget._x && inChar.isFacingRight && !inChar.pathFind && SwainMath.randomNumber(0,inChar.traitDistracted * 2) == 0)
          {
             inChar.moveLeft = true;
          }
@@ -456,7 +456,7 @@ class MadnessAI
       else if(inChar.rofTimer > inChar.myDataRef.myWeapons[inChar.myWeapon].myROF || inChar.myDataRef.myWeapons[inChar.myWeapon] == undefined || inChar.rofTimer <= 1)
       {
          MadnessAI.myTarget = undefined;
-         if(inChar.myFacing == "left")
+         if(!inChar.isFacingRight)
          {
             inChar.myAimX = inChar._x - 50;
          }
@@ -584,7 +584,7 @@ class MadnessAI
       {
          if(inChar.myDataRef.myWeapons[inChar.myWeapon].melee && inChar.myDataRef.myHat[0] == undefined && inChar.myDataRef.myWeapons[1 - inChar.myWeapon].myAmmo > 0)
          {
-            if(inChar._y < MadnessAI.myTarget._y + 20 && inChar._y > MadnessAI.myTarget._y - 20 && (inChar.myFacing == "left" && MadnessAI.myTarget._x < inChar._x || inChar.myFacing == "right" && MadnessAI.myTarget._x > inChar._x))
+            if(inChar._y < MadnessAI.myTarget._y + 20 && inChar._y > MadnessAI.myTarget._y - 20 && (!inChar.isFacingRight && MadnessAI.myTarget._x < inChar._x || inChar.isFacingRight && MadnessAI.myTarget._x > inChar._x))
             {
                inChar.togglePickup = true;
             }
@@ -592,7 +592,7 @@ class MadnessAI
       }
       if(inChar.myDataRef.myWeapons[inChar.myWeapon].myType == "hook")
       {
-         if(inChar._y < MadnessAI.myTarget._y + 20 && inChar._y > MadnessAI.myTarget._y - 20 && (inChar.myFacing == "left" && MadnessAI.myTarget._x < inChar._x || inChar.myFacing == "right" && MadnessAI.myTarget._x > inChar._x))
+         if(inChar._y < MadnessAI.myTarget._y + 20 && inChar._y > MadnessAI.myTarget._y - 20 && (!inChar.isFacingRight && MadnessAI.myTarget._x < inChar._x || inChar.isFacingRight && MadnessAI.myTarget._x > inChar._x))
          {
             if(MadnessAI.myTarget._x > inChar._x + 130 && MadnessAI.myTarget._x < inChar._x + 500 || MadnessAI.myTarget._x < inChar._x - 130 && MadnessAI.myTarget._x > inChar._x - 500)
             {

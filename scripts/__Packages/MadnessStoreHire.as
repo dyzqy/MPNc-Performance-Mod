@@ -187,7 +187,7 @@ class MadnessStoreHire extends MovieClip
          {
             inCard.myShirt = 0;
          }
-         inCard.myFacing = "right";
+         inCard.isFacingRight = true;
          inCard.reloadTimer = -1;
          inCard.statName = inCard.myDataRef.myName;
          inCard.mySprite.gotoAndStop(inCard.myDataRef.myIconPos);

@@ -802,7 +802,7 @@ class MadnessEvents
    static function world_1_5_18()
    {
       MadWorld.freezeCharacters(true);
-      MadnessLevel.myRooms[18].myCharacters[0].mySprite.myFacing = MadnessLevel.myRooms[18].myCharacters[1].mySprite.myFacing = MadnessLevel.myRooms[18].myCharacters[2].mySprite.myFacing = "right";
+      MadnessLevel.myRooms[18].myCharacters[0].mySprite.isFacingRight = MadnessLevel.myRooms[18].myCharacters[1].mySprite.isFacingRight = MadnessLevel.myRooms[18].myCharacters[2].mySprite.isFacingRight = true;
       MadnessLevel.myRooms[18].myCharacters[0].mySprite.myAimX = MadnessLevel.myRooms[18].myCharacters[0].mySprite._x + 20;
       MadnessLevel.myRooms[18].myCharacters[1].mySprite.myAimX = MadnessLevel.myRooms[18].myCharacters[1].mySprite._x + 20;
       MadnessLevel.myRooms[18].myCharacters[2].mySprite.myAimX = MadnessLevel.myRooms[18].myCharacters[2].mySprite._x + 20;
@@ -975,11 +975,11 @@ class MadnessEvents
       {
          if(inEvent == "start")
          {
-            inChar.myFacing = "left";
+            inChar.isFacingRight = false;
             inChar._parent.attachMovie("start_point","bossStart",inChar._parent.getNextHighestDepth());
             inChar._parent.bossStart._x = inChar._parent.WPbossfall._x;
             inChar._parent.bossStart._y = inChar._parent.WPbossfall._y;
-            inChar._parent.bossStart.startFacing = inChar.myFacing;
+            inChar._parent.bossStart.startFacing = inChar.isFacingRight;
             inChar._parent.bossStart._visible = false;
          }
          if(inEvent == "tick")
@@ -990,11 +990,11 @@ class MadnessEvents
                {
                   if(inChar._x < MadnessRoster.playerRoster.teamLeader.mySprite._x)
                   {
-                     inChar.myFacing = "right";
+                     inChar.isFacingRight = true;
                   }
                   else
                   {
-                     inChar.myFacing = "left";
+                     inChar.isFacingRight = false;
                   }
                }
             }
@@ -1006,7 +1006,7 @@ class MadnessEvents
                inChar.myDataRef.myBossPhase = 1;
                inChar.myStatus = "dead";
                inChar.mySubStatus = "_stagger_mag1";
-               inChar.myFacing = inChar._parent.bossStart.startFacing;
+               inChar.isFacingRight = inChar._parent.bossStart.startFacing;
                inChar.mySprite.gotoAndStop(inChar.myStatus + inChar.mySubStatus);
                inChar.dropGun();
                inChar.myDataRef.myWeapons[0].myOwner = undefined;
@@ -1019,7 +1019,7 @@ class MadnessEvents
                inChar.myDataRef.myBossPhase = 1;
                inChar.myStatus = "dead";
                inChar.mySubStatus = "_mag1";
-               inChar.myFacing = inChar._parent.bossStart.startFacing;
+               inChar.isFacingRight = inChar._parent.bossStart.startFacing;
                inChar.mySprite.gotoAndStop(inChar.myStatus + inChar.mySubStatus);
                inChar.dropGun();
                inChar.myDataRef.myWeapons[0].myOwner = undefined;
@@ -1034,7 +1034,7 @@ class MadnessEvents
             inChar.mySpeed *= 2;
             inChar.myAccel *= 2;
             inChar.mySubStatus = "_wounded";
-            inChar.myFacing = inChar._parent.bossStart.startFacing;
+            inChar.isFacingRight = inChar._parent.bossStart.startFacing;
             inChar.mySprite.gotoAndStop(inChar.myStatus + inChar.mySubStatus);
             inChar.myDataRef.myHealth = 1e+22;
             inChar.myHealth = 1e+22;
@@ -1050,7 +1050,7 @@ class MadnessEvents
                inChar.myDataRef.myWeapons[0].myDamage *= 3;
                inChar.myDataRef.myWeapons[0].myClips = 2000;
                inChar.myStatus = "dead";
-               inChar.myFacing = inChar._parent.bossStart.startFacing;
+               inChar.isFacingRight = inChar._parent.bossStart.startFacing;
                inChar.mySubStatus = "_stagger_mag2";
                inChar.mySprite.gotoAndStop(inChar.myStatus + inChar.mySubStatus);
                inChar.myDataRef.myHealth = 1e+22;
@@ -1065,7 +1065,7 @@ class MadnessEvents
             inChar.myMission = "engage";
             inChar.rofTimer = 9999;
             inChar.reloadTimer = -1;
-            inChar.myFacing = inChar._parent.bossStart.startFacing;
+            inChar.isFacingRight = inChar._parent.bossStart.startFacing;
             inChar.myWidth = inChar.myHeight * inChar.myDataRef.myScale;
             inChar.myDataRef.myWidth = inChar.myWidth;
             inChar.mySprite.gotoAndStop(inChar.myStatus + inChar.mySubStatus);
@@ -1085,11 +1085,11 @@ class MadnessEvents
          {
             inChar.myMission = "engage";
             MadnessLevel.currentLevel.myDifficulty = 2;
-            inChar.myFacing = "left";
+            inChar.isFacingRight = false;
             inChar._parent.attachMovie("start_point","bossStart",inChar._parent.getNextHighestDepth());
             inChar._parent.bossStart._x = inChar._parent.WPbossfall._x;
             inChar._parent.bossStart._y = inChar._parent.WPbossfall._y;
-            inChar._parent.bossStart.startFacing = inChar.myFacing;
+            inChar._parent.bossStart.startFacing = inChar.isFacingRight;
             inChar._parent.bossStart._visible = false;
          }
          if(inEvent == "tick")
@@ -1102,7 +1102,7 @@ class MadnessEvents
                inChar.myDataRef.myBossPhase = 1;
                inChar.myStatus = "dead";
                inChar.mySubStatus = "_mag2";
-               inChar.myFacing = inChar._parent.bossStart.startFacing;
+               inChar.isFacingRight = inChar._parent.bossStart.startFacing;
                inChar.mySprite.gotoAndStop(inChar.myStatus + inChar.mySubStatus);
                inChar.dropGun();
                inChar.myDataRef.myWeapons[0].myOwner = undefined;

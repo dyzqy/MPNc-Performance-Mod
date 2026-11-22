@@ -112,7 +112,8 @@ class MadnessCharacter extends MovieClip
    var mySpeedRight = new Number();
    var mySpeedDown = new Number();
    var myStatus = new String();
-   var myFacing = new String();
+   // 23/11/2026 dyzqy: A Boolean is faster to check than a String!
+   var isFacingRight:Boolean = false;
    var facingOpposite = false;
    var myGameSpeed = new Number();
    var slowmoSpeedMod = new Number();
@@ -230,24 +231,25 @@ class MadnessCharacter extends MovieClip
       this.refreshStats();
       if(myDoor.myDir == "right" || myDoor.myDir == "left")
       {
-         this.myFacing = myDoor.myDir;
+         // TODO: Implement the same system in myDoor.myDir
+         this.isFacingRight = (myDoor.myDir == "right");
       }
       else if(SwainMath.randomNumber(0,1) == 0)
       {
-         this.myFacing = "right";
+         this.isFacingRight = true;
       }
       else
       {
-         this.myFacing = "left";
+         this.isFacingRight = false;
       }
-      if(this.myFacing == "right")
+      if(this.isFacingRight)
       {
          this.myAimX = this._x + 50;
          this.mySpeedRight = this.mySpeed;
       }
       else
       {
-         this.myFacing = "left";
+         this.isFacingRight = false;
          this.myAimX = this._x - 50;
          this.mySpeedRight = - this.mySpeed;
          this._xscale = -100;
@@ -266,7 +268,7 @@ class MadnessCharacter extends MovieClip
       {
          this.myStatus = this.myDataRef.lastStatus;
          this.mySubStatus = this.myDataRef.lastSubStatus;
-         this.myFacing = this.myDataRef.lastFacing;
+         this.isFacingRight = this.myDataRef.lastFacing;
          this.gotoAndStop(this.myStatus + this.mySubStatus);
          this.mySprite.onEnterFrame = this.amDead;
          this.cacheAsBitmap = true;
@@ -527,7 +529,7 @@ class MadnessCharacter extends MovieClip
                      {
                         if(this._y == MadnessObstacle.allObstacles[_loc2_]._y + MadnessObstacle.allObstacles[_loc2_].myDepth / 2 + 1 || this._y == MadnessObstacle.allObstacles[_loc2_]._y - MadnessObstacle.allObstacles[_loc2_].myDepth / 2 - 1)
                         {
-                           if(this.myFacing == "right")
+                           if(this.isFacingRight)
                            {
                               this._x += 4 * this.slowmoSpeedMod * this.doorLockBoost;
                            }
@@ -714,13 +716,13 @@ class MadnessCharacter extends MovieClip
                   this.interactTarget._visible = false;
                   this.myStatus = "execute";
                   this.interactTarget.killMe();
-                  if(this.interactTarget.myFacing == "right")
+                  if(this.interactTarget.isFacingRight)
                   {
-                     this.myFacing = "left";
+                     this.isFacingRight = false;
                   }
                   else
                   {
-                     this.myFacing = "right";
+                     this.isFacingRight = true;
                   }
                   this.mySpeedRight = 0;
                   this.mySpeedDown = 0;
@@ -740,7 +742,7 @@ class MadnessCharacter extends MovieClip
                   this.mySpeedRight = 0;
                   this.mySpeedDown = 0;
                   this.myStatus = "use";
-                  this.myFacing = "right";
+                  this.isFacingRight = true;
                }
                this.interactType = "";
             }
@@ -808,14 +810,14 @@ class MadnessCharacter extends MovieClip
       {
          if(this.mySpeedRight < 0)
          {
-            this.myFacing = "left";
+            this.isFacingRight = false;
          }
          else if(this.mySpeedRight > 0)
          {
-            this.myFacing = "right";
+            this.isFacingRight = true;
          }
       }
-      if(this.myFacing == "left")
+      if(!this.isFacingRight)
       {
          this._xscale *= -1;
          this.myTacBar._xscale = -100;
@@ -1108,7 +1110,7 @@ class MadnessCharacter extends MovieClip
                   this.mySprite.stop();
                   this.myDataRef.lastStatus = this.myStatus;
                   this.myDataRef.lastSubStatus = this.mySubStatus;
-                  this.myDataRef.lastFacing = this.myFacing;
+                  this.myDataRef.lastFacing = this.isFacingRight;
                   this.cacheAsBitmap = true;
                   return true;
                }
@@ -1273,11 +1275,11 @@ class MadnessCharacter extends MovieClip
             {
                if(!this.myAttackTarget._x > this._x)
                {
-                  this.myFacing = "right";
+                  this.isFacingRight = true;
                }
                else
                {
-                  this.myFacing = "left";
+                  this.isFacingRight = false;
                }
             }
          }
@@ -1331,11 +1333,11 @@ class MadnessCharacter extends MovieClip
          {
             if(this.myAttackTarget._x > this._x)
             {
-               this.myFacing = "right";
+               this.isFacingRight = true;
             }
             else
             {
-               this.myFacing = "left";
+               this.isFacingRight = false;
             }
          }
       }
@@ -1367,11 +1369,11 @@ class MadnessCharacter extends MovieClip
                this.rofLastFrame = 1;
                if(this.myAimX < this._x)
                {
-                  this.myFacing = "left";
+                  this.isFacingRight = false;
                }
                else
                {
-                  this.myFacing = "right";
+                  this.isFacingRight = true;
                }
             }
          }
@@ -1420,7 +1422,7 @@ class MadnessCharacter extends MovieClip
                   this.actionTimer = 0;
                   this.actionSlowdown = false;
                   this.mySubStatus = "_leap";
-                  if(this.myAimX < this._x && this.myFacing == "right" || this.myAimX > this._x && this.myFacing == "left")
+                  if(this.myAimX < this._x && this.isFacingRight || this.myAimX > this._x && !this.isFacingRight)
                   {
                      this.mySubStatus += "Back";
                   }
@@ -1487,11 +1489,11 @@ class MadnessCharacter extends MovieClip
       {
          if(this.targetObstacle._x > this._x)
          {
-            this.myFacing = "right";
+            this.isFacingRight = true;
          }
          else
          {
-            this.myFacing = "left";
+            this.isFacingRight = false;
          }
          if(this.amPlayer && (this.moveUp || this.moveDown || this.moveRight || this.moveLeft) || this.toggleGuard)
          {
@@ -1547,7 +1549,7 @@ class MadnessCharacter extends MovieClip
                {
                   this.mySubStatus = "_clumsy";
                }
-               if(this.mySpeedRight < 0 && this.myFacing == "right" || this.mySpeedRight > 0 && this.myFacing == "left")
+               if(this.mySpeedRight < 0 && this.isFacingRight || this.mySpeedRight > 0 && !this.isFacingRight)
                {
                   this.mySubStatus += "Back";
                }
@@ -1697,7 +1699,7 @@ class MadnessCharacter extends MovieClip
             else
             {
                this.mySpeedDown = 0;
-               if(this.myFacing == "right" && this.lastStairsAngle < 90 || this.myFacing == "left" && this.lastStairsAngle >= 90)
+               if(this.isFacingRight && this.lastStairsAngle < 90 || !this.isFacingRight && this.lastStairsAngle >= 90)
                {
                   this.mySubStatus = "_landed3";
                }
@@ -1917,7 +1919,7 @@ class MadnessCharacter extends MovieClip
          }
          else if(this.myStatus != "tactics")
          {
-            if(!this.myDataRef.amZombie && !this.myDataRef.amAbom && (this.backtrackTimer < 10 || SwainMath.randomNumber(0,4 * (2 - this.myGameSpeed)) != 0) && (this.mySpeedRight > 0 && this.myFacing == "left" && this.myAimX < this._x || this.mySpeedRight < 0 && this.myFacing == "right" && this.myAimX > this._x))
+            if(!this.myDataRef.amZombie && !this.myDataRef.amAbom && (this.backtrackTimer < 10 || SwainMath.randomNumber(0,4 * (2 - this.myGameSpeed)) != 0) && (this.mySpeedRight > 0 && !this.isFacingRight && this.myAimX < this._x || this.mySpeedRight < 0 && this.isFacingRight && this.myAimX > this._x))
             {
                this.myStatus = "backtrack";
                if(this.reloadTimer == -1)
@@ -2103,11 +2105,11 @@ class MadnessCharacter extends MovieClip
          this.mySpeedDown = (this.intendedY - this._y) * 0.1;
          if(this.myAttackTarget._x > this._x)
          {
-            this.myFacing = "right";
+            this.isFacingRight = true;
          }
          else
          {
-            this.myFacing = "left";
+            this.isFacingRight = false;
          }
          if(this.myAttackTarget.myStatus != "restrained")
          {
@@ -2213,11 +2215,11 @@ class MadnessCharacter extends MovieClip
             }
             if(this.myAimX < this._x)
             {
-               this.myFacing = "left";
+               this.isFacingRight = false;
             }
             else
             {
-               this.myFacing = "right";
+               this.isFacingRight = true;
             }
             this.facingOpposite = false;
             this.myStatus = "magic";
@@ -2385,11 +2387,11 @@ class MadnessCharacter extends MovieClip
                }
                if(this.myAimX < this._x)
                {
-                  this.myFacing = "left";
+                  this.isFacingRight = false;
                }
                else
                {
-                  this.myFacing = "right";
+                  this.isFacingRight = true;
                }
             }
             else if(this.myStatus == "dash" && !this.myDataRef.amZombie && !this.myDataRef.amAbom)
@@ -2490,11 +2492,11 @@ class MadnessCharacter extends MovieClip
                }
                if(this.myAimX < this._x)
                {
-                  this.myFacing = "left";
+                  this.isFacingRight = false;
                }
                else
                {
-                  this.myFacing = "right";
+                  this.isFacingRight = true;
                }
             }
          }
@@ -2505,11 +2507,11 @@ class MadnessCharacter extends MovieClip
                this.myStatus = "unarmed_zombie_melee1";
                if(this.myAimX < this._x)
                {
-                  this.myFacing = "left";
+                  this.isFacingRight = false;
                }
                else
                {
-                  this.myFacing = "right";
+                  this.isFacingRight = true;
                }
             }
             else if(this.myDataRef.myCharacter == "fatboy")
@@ -2517,11 +2519,11 @@ class MadnessCharacter extends MovieClip
                this.myStatus = "melee_slam";
                if(this.myAimX < this._x)
                {
-                  this.myFacing = "left";
+                  this.isFacingRight = false;
                }
                else
                {
-                  this.myFacing = "right";
+                  this.isFacingRight = true;
                }
             }
             else if(this.myStatus == "dash")
@@ -2603,11 +2605,11 @@ class MadnessCharacter extends MovieClip
                this.meleeCombos = this.meleeCombos + 1;
                if(this.myAimX < this._x)
                {
-                  this.myFacing = "left";
+                  this.isFacingRight = false;
                }
                else
                {
-                  this.myFacing = "right";
+                  this.isFacingRight = true;
                }
             }
          }
@@ -2616,11 +2618,11 @@ class MadnessCharacter extends MovieClip
             this.myStatus = "unarmed_zombie_gun1";
             if(this.myAimX < this._x)
             {
-               this.myFacing = "left";
+               this.isFacingRight = false;
             }
             else
             {
-               this.myFacing = "right";
+               this.isFacingRight = true;
             }
          }
          else if(this.myDataRef.myWeapons[this.myWeapon].myAmmo > 0)
@@ -2787,7 +2789,7 @@ class MadnessCharacter extends MovieClip
             if(this.myRoom.amStairs)
             {
                this.myStatus = "dead";
-               if(this.myFacing == "right" && this.myRoom.downAngle < 90 || this.myFacing == "left" && this.myRoom.downAngle >= 90)
+               if(this.isFacingRight && this.myRoom.downAngle < 90 || !this.isFacingRight && this.myRoom.downAngle >= 90)
                {
                   this.mySubStatus = "_stairs2";
                }
@@ -3100,7 +3102,7 @@ class MadnessCharacter extends MovieClip
          _loc3_ = 1;
       }
       var _loc17_ = 1;
-      if(this.myFacing == "left")
+      if(!this.isFacingRight)
       {
          _loc17_ = -1;
       }
@@ -3523,7 +3525,7 @@ class MadnessCharacter extends MovieClip
                {
                   var _loc14_ = this._parent.myRooms[0];
                   var _loc13_ = this._parent.myRooms[this._parent.myRooms.length - 1];
-                  if(this._x < _loc14_.myDL._x + (_loc14_.myUL._x - _loc14_.myDL._x) * ((this._y - _loc14_.myUL._y) / (_loc14_.myDL._y - _loc14_.myUL._y)) + 60 && inAttacker._x > this._x && this.myFacing == "right" || this._x > _loc13_.myUR._x + (_loc13_.myDR._x - _loc13_.myUR._x) * ((this._y - _loc13_.myUR._y) / (_loc13_.myDR._y - _loc13_.myUR._y)) - 60 && inAttacker._x < this._x && this.myFacing == "left")
+                  if(this._x < _loc14_.myDL._x + (_loc14_.myUL._x - _loc14_.myDL._x) * ((this._y - _loc14_.myUL._y) / (_loc14_.myDL._y - _loc14_.myUL._y)) + 60 && inAttacker._x > this._x && this.isFacingRight || this._x > _loc13_.myUR._x + (_loc13_.myDR._x - _loc13_.myUR._x) * ((this._y - _loc13_.myUR._y) / (_loc13_.myDR._y - _loc13_.myUR._y)) - 60 && inAttacker._x < this._x && !this.isFacingRight)
                   {
                      this.mySubStatus = "_wall1";
                   }
@@ -3585,7 +3587,7 @@ class MadnessCharacter extends MovieClip
                {
                   _loc14_ = this._parent.myRooms[0];
                   _loc13_ = this._parent.myRooms[this._parent.myRooms.length - 1];
-                  if(this._x < _loc14_.myDL._x + (_loc14_.myUL._x - _loc14_.myDL._x) * ((this._y - _loc14_.myUL._y) / (_loc14_.myDL._y - _loc14_.myUL._y)) + 120 && inAttacker._x > this._x && this.myFacing == "right" || this._x > _loc13_.myUR._x + (_loc13_.myDR._x - _loc13_.myUR._x) * ((this._y - _loc13_.myUR._y) / (_loc13_.myDR._y - _loc13_.myUR._y)) - 120 && inAttacker._x < this._x && this.myFacing == "left")
+                  if(this._x < _loc14_.myDL._x + (_loc14_.myUL._x - _loc14_.myDL._x) * ((this._y - _loc14_.myUL._y) / (_loc14_.myDL._y - _loc14_.myUL._y)) + 120 && inAttacker._x > this._x && this.isFacingRight || this._x > _loc13_.myUR._x + (_loc13_.myDR._x - _loc13_.myUR._x) * ((this._y - _loc13_.myUR._y) / (_loc13_.myDR._y - _loc13_.myUR._y)) - 120 && inAttacker._x < this._x && !this.isFacingRight)
                   {
                      this.mySubStatus = "_wall2";
                   }
@@ -3749,7 +3751,7 @@ class MadnessCharacter extends MovieClip
          var _loc3_ = new Object();
          if(_loc2_.melee || this.myDataRef.myWeapons[this.myWeapon].melee)
          {
-            if(this.myFacing == "left")
+            if(!this.isFacingRight)
             {
                this.targetX = this._x + 10;
             }
@@ -3806,7 +3808,7 @@ class MadnessCharacter extends MovieClip
             this.myAimX = SwainMath.get_position(this._x,this._y - this.myDataRef.myShootHeight * (this._yscale / 100) * _loc16_,80,_loc2_.myRange * this.myDataRef.myScale,"x");
             this.myAimY = SwainMath.get_position(this._x,this._y - this.myDataRef.myShootHeight * (this._yscale / 100) * _loc16_,80,_loc2_.myRange * this.myDataRef.myScale,"y");
          }
-         if(inMeleeDir != "" && this.myFacing == "left")
+         if(inMeleeDir != "" && !this.isFacingRight)
          {
             this.myAimX = this._x - (this.myAimX - this._x);
          }
@@ -3965,7 +3967,7 @@ class MadnessCharacter extends MovieClip
                                                    this.intendedX = this.targetEnemy._x;
                                                    this.intendedY = this.targetEnemy._y;
                                                    this.targetApproach = true;
-                                                   if(this.myFacing == "right")
+                                                   if(this.isFacingRight)
                                                    {
                                                       this.intendedX -= _loc2_.myRange * this.myDataRef.myScale - 40;
                                                    }
@@ -4050,7 +4052,7 @@ class MadnessCharacter extends MovieClip
                                                       _loc6_ = true;
                                                       break;
                                                    }
-                                                   if(this.myDataRef.weaponStealer && (this.targetEnemy.myStatus != "melee" && this.targetEnemy.rofTimer < 15 || this.targetEnemy.myStatus == "restrained" && SwainMath.randomNumber(0,1) == 0) && this.myDataRef.myWeapons[this.myWeapon] == undefined && this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon] != undefined && (this.targetEnemy.myStatus == "restrained" || this.targetEnemy._x > this._x && (this.targetEnemy.myFacing == "right" && this.targetEnemy.facingOpposite || this.targetEnemy.myFacing == "left" && !this.targetEnemy.facingOpposite) || this.targetEnemy._x < this._x && (this.targetEnemy.myFacing == "left" && this.targetEnemy.facingOpposite || this.targetEnemy.myFacing == "right" && !this.targetEnemy.facingOpposite)) && this.myDataRef.myScale == this.targetEnemy.myDataRef.myScale)
+                                                   if(this.myDataRef.weaponStealer && (this.targetEnemy.myStatus != "melee" && this.targetEnemy.rofTimer < 15 || this.targetEnemy.myStatus == "restrained" && SwainMath.randomNumber(0,1) == 0) && this.myDataRef.myWeapons[this.myWeapon] == undefined && this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon] != undefined && (this.targetEnemy.myStatus == "restrained" || this.targetEnemy._x > this._x && (this.targetEnemy.isFacingRight && this.targetEnemy.facingOpposite || !this.targetEnemy.isFacingRight && !this.targetEnemy.facingOpposite) || this.targetEnemy._x < this._x && (!this.targetEnemy.isFacingRight && this.targetEnemy.facingOpposite || this.targetEnemy.isFacingRight && !this.targetEnemy.facingOpposite)) && this.myDataRef.myScale == this.targetEnemy.myDataRef.myScale)
                                                    {
                                                       this.playSound("swish");
                                                       if(this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon].melee)
@@ -4098,7 +4100,7 @@ class MadnessCharacter extends MovieClip
                                                       this.intendedX = this.targetEnemy._x;
                                                       this.intendedY = this.targetEnemy._y + 8;
                                                       this.intendedY += SwainMath.randomNumber(-50,50) * 0.1;
-                                                      if(this.myFacing == "right")
+                                                      if(this.isFacingRight)
                                                       {
                                                          this.intendedX -= (_loc2_.myRange * this.myDataRef.myScale - 40) * (SwainMath.randomNumber(50,100) * 0.01);
                                                       }
@@ -4194,7 +4196,7 @@ class MadnessCharacter extends MovieClip
       if(inAction == "execute")
       {
          this.interactTarget._visible = true;
-         if(this.myFacing == "right")
+         if(this.isFacingRight)
          {
             this._x += this.mySprite.spawn_player._x + this.mySprite._x;
          }
@@ -4220,7 +4222,7 @@ class MadnessCharacter extends MovieClip
    }
    function amBlocking(inTarget, inAttacker, thisWeapon)
    {
-      return inTarget.blocking && (thisWeapon.melee || MadnessDataFile.havePerk("perkBlock1",inTarget.myDataRef)) && ((inTarget.myFacing == "right" && !inTarget.facingOpposite || inTarget.myFacing == "left" && inTarget.facingOpposite) && inTarget._x < inAttacker._x || (inTarget.myFacing == "left" && !inTarget.facingOpposite || inTarget.myFacing == "right" && inTarget.facingOpposite) && inTarget._x > inAttacker._x);
+      return inTarget.blocking && (thisWeapon.melee || MadnessDataFile.havePerk("perkBlock1",inTarget.myDataRef)) && ((inTarget.isFacingRight && !inTarget.facingOpposite || !inTarget.isFacingRight && inTarget.facingOpposite) && inTarget._x < inAttacker._x || (!inTarget.isFacingRight && !inTarget.facingOpposite || inTarget.isFacingRight && inTarget.facingOpposite) && inTarget._x > inAttacker._x);
    }
    function blockReset()
    {
@@ -4239,7 +4241,7 @@ class MadnessCharacter extends MovieClip
       if(!inWeapon.melee)
       {
          var _loc6_ = undefined;
-         if(this.myFacing == "left" && !this.facingOpposite || this.myFacing == "right" && this.facingOpposite)
+         if(!this.isFacingRight && !this.facingOpposite || this.isFacingRight && this.facingOpposite)
          {
             _loc6_ = -1;
          }
@@ -4263,7 +4265,7 @@ class MadnessCharacter extends MovieClip
    function makeSparks(inX, inY, inFloor, inSparkCat)
    {
       var _loc2_ = undefined;
-      if(this.myFacing == "left" && !this.facingOpposite || this.myFacing == "right" && this.facingOpposite)
+      if(!this.isFacingRight && !this.facingOpposite || this.isFacingRight && this.facingOpposite)
       {
          _loc2_ = -1;
       }
@@ -4277,7 +4279,7 @@ class MadnessCharacter extends MovieClip
    function ejectShell()
    {
       var _loc2_ = undefined;
-      if(this.myFacing == "left" && !this.facingOpposite || this.myFacing == "right" && this.facingOpposite)
+      if(!this.isFacingRight && !this.facingOpposite || this.isFacingRight && this.facingOpposite)
       {
          _loc2_ = -1;
       }
@@ -4291,7 +4293,7 @@ class MadnessCharacter extends MovieClip
    function ejectClip()
    {
       var _loc2_ = undefined;
-      if(this.myFacing == "left" && !this.facingOpposite || this.myFacing == "right" && this.facingOpposite)
+      if(!this.isFacingRight && !this.facingOpposite || this.isFacingRight && this.facingOpposite)
       {
          _loc2_ = -1;
       }
@@ -4307,7 +4309,7 @@ class MadnessCharacter extends MovieClip
       if(this.myDataRef.myWeapons[this.myWeapon] != undefined && !this.myDataRef.strongGrip)
       {
          var _loc2_ = undefined;
-         if(this.myFacing == "left" && !this.facingOpposite || this.myFacing == "right" && this.facingOpposite)
+         if(!this.isFacingRight && !this.facingOpposite || this.isFacingRight && this.facingOpposite)
          {
             _loc2_ = -1;
          }
@@ -4339,7 +4341,7 @@ class MadnessCharacter extends MovieClip
       if(this.myDataRef.myWeapons[this.myWeapon] != undefined && !this.myDataRef.strongGrip)
       {
          var _loc2_ = undefined;
-         if(this.myFacing == "left" && !this.facingOpposite || this.myFacing == "right" && this.facingOpposite)
+         if(!this.isFacingRight && !this.facingOpposite || this.isFacingRight && this.facingOpposite)
          {
             _loc2_ = -1;
          }
@@ -4361,7 +4363,7 @@ class MadnessCharacter extends MovieClip
       if(inArmor != undefined)
       {
          var _loc2_ = undefined;
-         if(this.myFacing == "left" && !this.facingOpposite || this.myFacing == "right" && this.facingOpposite)
+         if(!this.isFacingRight && !this.facingOpposite || this.isFacingRight && this.facingOpposite)
          {
             _loc2_ = -1;
          }
@@ -4505,7 +4507,7 @@ class MadnessCharacter extends MovieClip
    }
    function applySpeed(inSpeedX, inSpeedY)
    {
-      if(this.myFacing == "left")
+      if(!this.isFacingRight)
       {
          inSpeedX *= -1;
       }
@@ -4539,7 +4541,7 @@ class MadnessCharacter extends MovieClip
    }
    function enemyInFront(inEnemy)
    {
-      return inEnemy._x > this._x && this.myFacing == "right" || inEnemy._x < this._x && this.myFacing == "left";
+      return inEnemy._x > this._x && this.isFacingRight || inEnemy._x < this._x && !this.isFacingRight;
    }
    var setSkinsAlready:Boolean = false;
   static function adjustSprite(inChar)
@@ -4553,15 +4555,15 @@ class MadnessCharacter extends MovieClip
 
       headCache.gotoAndStop(inChar.myDataRef.headType);
       bodyCache.gotoAndStop(inChar.myDataRef.bodyType);
-      if(inChar.myFacing == "left" || inChar.myFacing == "right" && inChar.myDataRef.myWeapons[inChar.myWeapon].twoHand && (inChar.myAimX <= inChar._x && inChar.myFacing == "right" || inChar.myAimX >= inChar._x && inChar.myFacing == "left") && inChar.reloadTimer == -1)
+      if(!inChar.isFacingRight || inChar.isFacingRight && inChar.myDataRef.myWeapons[inChar.myWeapon].twoHand && (inChar.myAimX <= inChar._x && inChar.isFacingRight || inChar.myAimX >= inChar._x && !inChar.isFacingRight) && inChar.reloadTimer == -1)
       {
          bodyCache.nextFrame();
       }
-      if(inChar.myFacing == "left" && !inChar.facingOpposite || inChar.myFacing == "right" && inChar.facingOpposite)
+      if(!inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite)
       {
          headCache.nextFrame();
       }
-      if(inChar.myFacing == "right" && inChar.myDataRef.myWeapons[inChar.myWeapon].twoHand && inChar.facingOpposite)
+      if(inChar.isFacingRight && inChar.myDataRef.myWeapons[inChar.myWeapon].twoHand && inChar.facingOpposite)
       {
          bodyCache._xscale = -100;
       }
@@ -4572,7 +4574,7 @@ class MadnessCharacter extends MovieClip
       if(inChar.myAimX != undefined && inChar.myStatus != "recover" && inChar.myStatus != "stun" && inChar.myStatus != "startup" && inChar.myStatus != "magic" && inChar.myHealth > 0)
       {
          var _loc5_ = undefined;
-         if(inChar.myDataRef.myWeapons[inChar.myWeapon] == undefined && (inChar.myFacing == "right" && inChar.myAimX < inChar._x || inChar.myFacing == "left" && inChar.myAimX > inChar._x))
+         if(inChar.myDataRef.myWeapons[inChar.myWeapon] == undefined && (inChar.isFacingRight && inChar.myAimX < inChar._x || !inChar.isFacingRight && inChar.myAimX > inChar._x))
          {
             _loc5_ = 90;
          }
@@ -4681,7 +4683,7 @@ class MadnessCharacter extends MovieClip
             handNoneFrontCache.myGun.myHand2.gotoAndStop("hand_back");
             handNoneFrontCache.myGun.gotoAndStop(inChar.actionTimer);
          }
-         else if(inChar.myFacing == "left" && !inChar.facingOpposite || inChar.myFacing == "right" && inChar.facingOpposite)
+         else if(!inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite)
          {
             MadnessCharacter.makeSpritePart(inChar,handNoneBackCache,_loc2_.myTag + " - L");
             MadnessCharacter.makeSpritePart(inChar,handNoneFrontCache,"remove");
@@ -4692,7 +4694,7 @@ class MadnessCharacter extends MovieClip
             handNoneFrontCache.gotoAndStop("hand_front");
             handShootFrontCache.gotoAndStop("hand_front");
          }
-         else if(inChar.myFacing == "right" && !inChar.facingOpposite || inChar.myFacing == "left" && inChar.facingOpposite)
+         else if(inChar.isFacingRight && !inChar.facingOpposite || !inChar.isFacingRight && inChar.facingOpposite)
          {
             MadnessCharacter.makeSpritePart(inChar,handNoneFrontCache,_loc2_.myTag + " - R");
             MadnessCharacter.makeSpritePart(inChar,handNoneBackCache,"remove");
@@ -4710,7 +4712,7 @@ class MadnessCharacter extends MovieClip
       }
       else
       {
-         if(inChar.myFacing == "left" && !inChar.facingOpposite || inChar.myFacing == "right" && inChar.facingOpposite)
+         if(!inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite)
          {
             if(inChar.reloadTimer == -1)
             {
@@ -4725,7 +4727,7 @@ class MadnessCharacter extends MovieClip
             MadnessCharacter.makeSpritePart(inChar,handNoneFrontCache,"remove");
             MadnessCharacter.makeSpritePart(inChar,handShootFrontCache,"remove");
          }
-         if(inChar.myFacing == "right" && !inChar.facingOpposite || inChar.myFacing == "left" && inChar.facingOpposite)
+         if(inChar.isFacingRight && !inChar.facingOpposite || !inChar.isFacingRight && inChar.facingOpposite)
          {
             if(inChar.reloadTimer == -1)
             {
@@ -4787,14 +4789,14 @@ class MadnessCharacter extends MovieClip
       }
       else if(inChar.myStatus.substr(0,7) == "unarmed" || inChar.myStatus.substr(0,5) == "melee" || inChar.myStatus.substr(0,7) == "execute" || inChar.myStatus == "swap" || inChar.myStatus == "startup" || inChar.myStatus == "pickup" || inChar.myStatus == "magic" || inChar.myStatus.substr(-6,5) == "parry" || inChar.myStatus.substr(0,4) == "stun")
       {
-         if(inChar.myFacing == "right")
+         if(inChar.isFacingRight)
          {
             handNoneFrontCache._visible = false;
             handShootFrontCache._visible = true;
             handNoneBackCache._visible = true;
             handShootBackCache._visible = false;
          }
-         if(inChar.myFacing == "left")
+         if(!inChar.isFacingRight)
          {
             handNoneFrontCache._visible = true;
             handShootFrontCache._visible = false;
@@ -4804,14 +4806,14 @@ class MadnessCharacter extends MovieClip
       }
       else if(_loc2_ != undefined && inChar.reloadTimer > -1)
       {
-         if(inChar.myFacing == "right")
+         if(inChar.isFacingRight)
          {
             handNoneFrontCache._visible = false;
             handShootFrontCache._visible = true;
             handNoneBackCache._visible = true;
             handShootBackCache._visible = false;
          }
-         if(inChar.myFacing == "left")
+         if(!inChar.isFacingRight)
          {
             handNoneFrontCache._visible = true;
             handShootFrontCache._visible = false;
@@ -4852,14 +4854,14 @@ class MadnessCharacter extends MovieClip
       }
       else if(inChar.aimTimer > -1 || _loc2_ != undefined && inChar.rofTimer < _loc2_.myROF + inChar.shootWaitBuffer && (inChar.myStatus == "incap" || inChar.myStatus == "cover" || inChar.myStatus == "idle" || inChar.myStatus == "run" || inChar.myStatus == "backtrack" || inChar.myStatus == "dash" || inChar.myStatus == "tactics"))
       {
-         if(inChar.myFacing == "right" && !inChar.facingOpposite || inChar.myFacing == "left" && inChar.facingOpposite)
+         if(inChar.isFacingRight && !inChar.facingOpposite || !inChar.isFacingRight && inChar.facingOpposite)
          {
             handNoneFrontCache._visible = false;
             handShootFrontCache._visible = true;
             handNoneBackCache._visible = true;
             handShootBackCache._visible = false;
          }
-         if(inChar.myFacing == "left" && !inChar.facingOpposite || inChar.myFacing == "right" && inChar.facingOpposite)
+         if(!inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite)
          {
             handNoneFrontCache._visible = true;
             handShootFrontCache._visible = false;
@@ -4914,7 +4916,7 @@ class MadnessCharacter extends MovieClip
          handShootFrontCache._visible = false;
          if(_loc2_ != undefined)
          {
-            if(inChar.myFacing == "left" && !inChar.facingOpposite || inChar.myFacing == "right" && inChar.facingOpposite)
+            if(!inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite)
             {
                handNoneBackCache.myGun.gotoAndStop(1);
             }
@@ -4934,12 +4936,12 @@ class MadnessCharacter extends MovieClip
       }
       if(_loc2_.twoHand && !inChar.myDataRef.amZombie && !inChar.myDataRef.amAbom)
       {
-         if(inChar.myFacing == "left" && !inChar.facingOpposite || inChar.myFacing == "right" && inChar.facingOpposite)
+         if(!inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite)
          {
             handShootFrontCache._visible = false;
             handNoneFrontCache._visible = false;
          }
-         if(inChar.myFacing == "right" && !inChar.facingOpposite || inChar.myFacing == "left" && inChar.facingOpposite)
+         if(inChar.isFacingRight && !inChar.facingOpposite || !inChar.isFacingRight && inChar.facingOpposite)
          {
             handShootBackCache._visible = false;
             handNoneBackCache._visible = false;
@@ -5015,7 +5017,7 @@ class MadnessCharacter extends MovieClip
             }
             else
             {
-               if(inChar.myAimX <= inChar._x && inChar.myFacing == "right" || inChar.myAimX >= inChar._x && inChar.myFacing == "left")
+               if(inChar.myAimX <= inChar._x && inChar.isFacingRight || inChar.myAimX >= inChar._x && !inChar.isFacingRight)
                {
                   handShootFrontCache._rotation = -90 - SwainMath.calculate_rotation(inChar._x - handShootFrontCache._x,inChar._y - handShootFrontCache._y,inChar.myAimX,inChar.myAimY);
                   handShootBackCache._rotation = -90 + SwainMath.calculate_rotation(inChar._x + handShootBackCache._x,inChar._y - handShootBackCache._y,inChar.myAimX,inChar.myAimY);
@@ -5058,7 +5060,7 @@ class MadnessCharacter extends MovieClip
             }
             else if(handShootFrontCache == undefined)
             {
-               if(handShootFrontCache == undefined && inChar.myFacing == "right")
+               if(handShootFrontCache == undefined && inChar.isFacingRight)
                {
                   handNoneBackCache._visible = true;
                   inChar.mySprite.myHand2._visible = false;
@@ -5085,7 +5087,7 @@ class MadnessCharacter extends MovieClip
             }
             else if(handShootBackCache == undefined)
             {
-               if(handShootBackCache == undefined && inChar.myFacing == "left")
+               if(handShootBackCache == undefined && !inChar.isFacingRight)
                {
                   handNoneFrontCache._visible = true;
                   inChar.mySprite.myHand._visible = false;
@@ -5137,7 +5139,7 @@ class MadnessCharacter extends MovieClip
       {
          inChar.mySprite.hisHead.gotoAndStop(inChar.interactTarget.myDataRef.myCharacter);
          inChar.mySprite.hisBody.gotoAndStop(inChar.interactTarget.myDataRef.myCharacter);
-         if(inChar.mySprite.flipPartner && inChar.myFacing == "right")
+         if(inChar.mySprite.flipPartner && inChar.isFacingRight)
          {
             inChar.mySprite.hisHead.nextFrame();
             inChar.mySprite.hisBody.nextFrame();
@@ -5168,7 +5170,7 @@ class MadnessCharacter extends MovieClip
          headCache.myMask._visible = true;
          if(inChar.myDataRef.myMask[inChar.myMask].flipMe)
          {
-            if(inChar.myFacing == "right")
+            if(inChar.isFacingRight)
             {
                headCache.myMask.gotoAndStop(inChar.myDataRef.myMask[inChar.myMask].myType + "_R");
             }
@@ -5356,7 +5358,7 @@ class MadnessCharacter extends MovieClip
    }
    function returnInvertValid()
    {
-      return this.reloadTimer == -1 && (this.myAimX <= this._x && this.myFacing == "right" || this.myAimX >= this._x && this.myFacing == "left");
+      return this.reloadTimer == -1 && (this.myAimX <= this._x && this.isFacingRight || this.myAimX >= this._x && !this.isFacingRight);
    }
    function swapGear()
    {
@@ -5419,7 +5421,7 @@ class MadnessCharacter extends MovieClip
       {
          _loc2_ = 0;
       }
-      if(inAttacker._x > this._x && (this.myFacing == "left" && !this.facingOpposite || this.myFacing == "right" && this.facingOpposite) || inAttacker._x < this._x && (this.myFacing == "right" && !this.facingOpposite || this.myFacing == "left" && this.facingOpposite))
+      if(inAttacker._x > this._x && (!this.isFacingRight && !this.facingOpposite || this.isFacingRight && this.facingOpposite) || inAttacker._x < this._x && (this.isFacingRight && !this.facingOpposite || !this.isFacingRight && this.facingOpposite))
       {
          _loc2_ *= 1.5;
       }
@@ -5485,7 +5487,7 @@ class MadnessCharacter extends MovieClip
       if(this.amPlayer || !this.amPlayer && this._x > this._parent.myFollowTarget._x - 400 && this._x < this._parent.myFollowTarget._x + 400)
       {
          var _loc2_ = undefined;
-         if(this.myFacing == "left" && !this.facingOpposite || this.myFacing == "right" && this.facingOpposite)
+         if(!this.isFacingRight && !this.facingOpposite || this.isFacingRight && this.facingOpposite)
          {
             _loc2_ = -1;
          }
@@ -5499,18 +5501,18 @@ class MadnessCharacter extends MovieClip
    }
    function spitBlood(inMajor)
    {
-      if(this.myFacing == "right")
+      if(this.isFacingRight)
       {
-         this.myFacing = "left";
+         this.isFacingRight = false;
       }
       else
       {
-         this.myFacing = "right";
+         this.isFacingRight = true;
       }
       var _loc2_ = 0;
       while(_loc2_ < 3)
       {
-         if(this.myFacing == "right")
+         if(this.isFacingRight)
          {
             this.makeSparks(this._x - (this.mySprite._x + this.mySprite.myHead._x + 10),this._y + (this.mySprite._y + this.mySprite.myHead._y + 12),this._y,"drops_" + this.myDataRef.myBlood);
          }
@@ -5524,17 +5526,17 @@ class MadnessCharacter extends MovieClip
          }
          _loc2_ = _loc2_ + 1;
       }
-      if(this.myFacing == "right")
+      if(this.isFacingRight)
       {
-         this.myFacing = "left";
+         this.isFacingRight = false;
       }
       else
       {
-         this.myFacing = "right";
+         this.isFacingRight = true;
       }
       if(inMajor)
       {
-         if(this.myFacing == "left")
+         if(!this.isFacingRight)
          {
             this._parent.createEffect(this._x - (this.mySprite._x + this.mySprite.myHead._x + 14),this._y + (this.mySprite._y + this.mySprite.myHead._y + 13),"blood" + String(SwainMath.randomNumber(4,6)) + "_" + this.myBlood,100,100,-90);
          }
@@ -5566,7 +5568,7 @@ class MadnessCharacter extends MovieClip
             {
                if(_loc2_.myHealth > 0 && !_loc2_.amDodging)
                {
-                  if(_loc2_._x > this._x && _loc2_._x < this._x + this.myDataRef.myUnarmed.myRange * this.myDataRef.myScale * 0.8 && (this.myFacing == "right" && !this.facingOpposite || this.myFacing == "left" && this.facingOpposite) || _loc2_._x < this._x && _loc2_._x > this._x - this.myDataRef.myUnarmed.myRange * this.myDataRef.myScale * 0.8 && (this.myFacing == "left" && !this.facingOpposite || this.myFacing == "right" && this.facingOpposite))
+                  if(_loc2_._x > this._x && _loc2_._x < this._x + this.myDataRef.myUnarmed.myRange * this.myDataRef.myScale * 0.8 && (this.isFacingRight && !this.facingOpposite || !this.isFacingRight && this.facingOpposite) || _loc2_._x < this._x && _loc2_._x > this._x - this.myDataRef.myUnarmed.myRange * this.myDataRef.myScale * 0.8 && (!this.isFacingRight && !this.facingOpposite || this.isFacingRight && this.facingOpposite))
                   {
                      if(this.inMeleeRange(_loc2_))
                      {
@@ -5653,7 +5655,7 @@ class MadnessCharacter extends MovieClip
       if(_loc6_ != undefined)
       {
          var _loc3_ = undefined;
-         if(this.myFacing == "left" && !this.facingOpposite || this.myFacing == "right" && this.facingOpposite)
+         if(!this.isFacingRight && !this.facingOpposite || this.isFacingRight && this.facingOpposite)
          {
             _loc3_ = -1;
          }
@@ -5699,7 +5701,7 @@ class MadnessCharacter extends MovieClip
    function launchGrenade()
    {
       var _loc3_ = undefined;
-      if(this.myFacing == "left" && !this.facingOpposite || this.myFacing == "right" && this.facingOpposite)
+      if(!this.isFacingRight && !this.facingOpposite || this.isFacingRight && this.facingOpposite)
       {
          _loc3_ = -1;
       }
@@ -5733,7 +5735,7 @@ class MadnessCharacter extends MovieClip
       {
          this.myStatus = "knockback";
          this.dropGun();
-         if(inSource._x < this._x && this.myFacing == "left" || inSource._x > this._x && this.myFacing == "right")
+         if(inSource._x < this._x && !this.isFacingRight || inSource._x > this._x && this.isFacingRight)
          {
             this.mySubStatus = "_1";
          }
@@ -5965,7 +5967,7 @@ class MadnessCharacter extends MovieClip
    }
    function canGrapple(inTarget)
    {
-      return (this.myDataRef.amZombie || this.myDataRef.amAbom && !this.myDataRef.noHands) && this.myDataRef.myScale == inTarget.myDataRef.myScale && (inTarget.myStatus == "idle" || inTarget.myStatus == "run" || inTarget.myStatus == "backtrack" || inTarget.myStatus == "dash" || inTarget.myStatus == "restrained" && SwainMath.randomNumber(0,1) == 0 || inTarget.myStatus.substr(0,5) == "melee" && (!inTarget.myDataRef.myWeapons[inTarget.myWeapon].melee || inTarget._x > this._x && inTarget.myFacing == "right" || inTarget._x < this._x && inTarget.myFacing == "left"));
+      return (this.myDataRef.amZombie || this.myDataRef.amAbom && !this.myDataRef.noHands) && this.myDataRef.myScale == inTarget.myDataRef.myScale && (inTarget.myStatus == "idle" || inTarget.myStatus == "run" || inTarget.myStatus == "backtrack" || inTarget.myStatus == "dash" || inTarget.myStatus == "restrained" && SwainMath.randomNumber(0,1) == 0 || inTarget.myStatus.substr(0,5) == "melee" && (!inTarget.myDataRef.myWeapons[inTarget.myWeapon].melee || inTarget._x > this._x && inTarget.isFacingRight || inTarget._x < this._x && !inTarget.isFacingRight));
    }
    function zombieBite()
    {
@@ -6270,7 +6272,7 @@ class MadnessCharacter extends MovieClip
          {
             var _loc2_ = undefined;
             var _loc3_ = this._x;
-            if(this.myFacing == "left")
+            if(!this.isFacingRight)
             {
                _loc2_ = -1;
             }
@@ -6284,7 +6286,7 @@ class MadnessCharacter extends MovieClip
          }
          if(this.magicLevel == 2)
          {
-            if(this.myFacing == "left")
+            if(!this.isFacingRight)
             {
                _loc2_ = -1;
             }
