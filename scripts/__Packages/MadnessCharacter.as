@@ -314,6 +314,11 @@ class MadnessCharacter extends MovieClip
    }
    function tick()
    {
+      // 22/11/2026 dyzqy: Offscreen culling.
+      // 23/11/2026 dyzqy: there's no such variable as camX or camY, am I crazy or what
+      // var offScreen = (Math.abs(this._x - camX) > 950 || Math.abs(this._y - camY) > 650);
+      // this._visible = !offScreen;
+
       if(this._parent.paused)
       {
          this.onEnterFrame = this.pauseTick;
@@ -419,13 +424,11 @@ class MadnessCharacter extends MovieClip
             var _loc2_ = 1;
             while(_loc2_ <= 4)
             {
-               if(this.myTactics > this.myTacticsMax - this.myTacticsMax / 4 * _loc2_)
+               var dotClip = this.myTacBar["dot" + String(_loc2_)];
+               var dotFrame = (this.myTactics > this.myTacticsMax - this.myTacticsMax / 4 * _loc2_) ? 2 : 1;
+               if(dotClip._currentframe != dotFrame)
                {
-                  this.myTacBar["dot" + String(_loc2_)].gotoAndStop(2);
-               }
-               else
-               {
-                  this.myTacBar["dot" + String(_loc2_)].gotoAndStop(1);
+                  dotClip.gotoAndStop(dotFrame);
                }
                _loc2_ = _loc2_ + 1;
             }
@@ -832,7 +835,11 @@ class MadnessCharacter extends MovieClip
             this._rotation = (- this.recoilTimer) / 2;
          }
       }
+
+      // 22/11/2026 dyzqy: No overlapping gotoAndStops, instead, save final value and make it *the* one!
       this.facingOpposite = false;
+      var targetFrame = undefined;
+
       if(!this.myDataRef.amZombie && !this.myDataRef.amAbom)
       {
          if(this.myStatus == "cover" || this.myStatus == "block" || this.myStatus == "run" || this.myStatus == "idle" || this.myStatus == "tactics")
@@ -842,36 +849,36 @@ class MadnessCharacter extends MovieClip
                if(this.returnInvertValid())
                {
                   this.facingOpposite = true;
-                  this.gotoAndStop(this.myStatus + "_turn");
+                  targetFrame = this.myStatus + "_turn";
                }
                else
                {
-                  this.gotoAndStop(this.myStatus);
+                  targetFrame = this.myStatus;
                }
             }
          }
-         if(this.myStatus == "dash")
+         else if(this.myStatus == "dash")
          {
             if(this.mySpeedRight > 0 && this.mySpeedRight > this.mySpeed || this.mySpeedRight < 0 && this.mySpeedRight < - this.mySpeed)
             {
                if(this.returnInvertValid())
                {
                   this.facingOpposite = true;
-                  this.gotoAndStop("dash_turn");
+                  targetFrame = "dash_turn";
                }
                else
                {
-                  this.gotoAndStop("dash");
+                  targetFrame = "dash";
                }
             }
             else if(this.returnInvertValid())
             {
                this.facingOpposite = true;
-               this.gotoAndStop("run_turn");
+               targetFrame = "run_turn";
             }
             else
             {
-               this.gotoAndStop("run");
+               targetFrame = "run";
             }
          }
       }
@@ -881,139 +888,91 @@ class MadnessCharacter extends MovieClip
          {
             if(this.myDataRef.myWeapons[this.myWeapon] == undefined)
             {
-               this.gotoAndStop(this.myStatus + "_zombie_" + this.mySubIdle);
+               targetFrame = this.myStatus + "_zombie_" + this.mySubIdle;
             }
             else if(this.myDataRef.myWeapons[this.myWeapon].melee)
             {
-               this.gotoAndStop(this.myStatus + "_zombie_melee1");
+               targetFrame = this.myStatus + "_zombie_melee1";
             }
             else
             {
-               this.gotoAndStop(this.myStatus + "_zombie_gun1");
+               targetFrame = this.myStatus + "_zombie_gun1";
             }
          }
-         if(this.myStatus == "run")
+         else if(this.myStatus == "run")
          {
             if(this.myDataRef.myWeapons[this.myWeapon] == undefined)
             {
-               this.gotoAndStop(this.myStatus + "_zombie_" + this.mySubWalk);
+               targetFrame = this.myStatus + "_zombie_" + this.mySubWalk;
             }
             else if(this.myDataRef.myWeapons[this.myWeapon].melee)
             {
-               this.gotoAndStop(this.myStatus + "_zombie_melee1");
+               targetFrame = this.myStatus + "_zombie_melee1";
             }
             else
             {
-               this.gotoAndStop(this.myStatus + "_zombie_gun1");
+               targetFrame = this.myStatus + "_zombie_gun1";
             }
          }
-         if(this.myStatus == "dash")
+         else if(this.myStatus == "dash")
          {
-            this.gotoAndStop(this.myStatus + "_zombie_1");
+            targetFrame = this.myStatus + "_zombie_1";
          }
       }
+
       if(this.myStatus == "dead")
       {
-         this.gotoAndStop("dead" + this.mySubStatus);
+         targetFrame = "dead" + this.mySubStatus;
       }
-      if(this.myStatus.substr(0,7) == "wounded")
+      else if(this.myStatus.substr(0,7) == "wounded")
       {
          if(this.wounded == 1)
          {
-            this.gotoAndStop("wounded_fall");
+            targetFrame = "wounded_fall";
          }
          else if(this.wounded == 2)
          {
             if(this.mySpeedRight != 0)
             {
-               this.gotoAndStop("wounded_move");
+               targetFrame = "wounded_move";
             }
             else
             {
-               this.gotoAndStop("wounded_idle");
+               targetFrame = "wounded_idle";
             }
          }
       }
-      if(this.myStatus.substr(0,5) == "melee")
+      else if(this.myStatus.substr(0,5) == "melee" || this.myStatus.substr(0,7) == "unarmed" || this.myStatus.substr(0,7) == "execute" || this.myStatus.substr(0,4) == "axed" || this.myStatus.substr(0,4) == "stun" || this.myStatus == "recover")
       {
-         this.gotoAndStop(this.myStatus);
+         targetFrame = this.myStatus;
       }
-      if(this.myStatus.substr(0,7) == "unarmed")
+      else if(this.myStatus == "startup")
       {
-         this.gotoAndStop(this.myStatus);
+         targetFrame = this.mySubStatus;
       }
-      if(this.myStatus.substr(0,7) == "execute")
+      else if(this.myStatus == "surrender" || this.myStatus == "dodge" || this.myStatus == "incap" || this.myStatus == "knockback" || this.myStatus == "restrained" || this.myStatus == "grapple")
       {
-         this.gotoAndStop(this.myStatus);
+         targetFrame = this.myStatus + this.mySubStatus;
       }
-      if(this.myStatus.substr(0,4) == "axed")
+      else if(this.myStatus == "use")
       {
-         this.gotoAndStop(this.myStatus);
+         targetFrame = this.targetActivator.myAnimation;
       }
-      if(this.myStatus.substr(0,4) == "stun")
+      else if(this.myStatus == "swap" || this.myStatus == "backtrack" || this.myStatus == "pickup")
       {
-         this.gotoAndStop(this.myStatus);
+         targetFrame = this.myStatus;
       }
-      if(this.myStatus == "recover")
+      else if(this.myStatus == "magic")
       {
-         this.gotoAndStop(this.myStatus);
+         targetFrame = "magic" + this.mySubStatus;
       }
-      if(this.myStatus == "startup")
+
+      if((this.myStatus == "run" || this.myStatus == "idle" || this.myStatus == "backtrack") && this.mySubStatus.substr(0,8) == "_wounded")
       {
-         this.gotoAndStop(this.mySubStatus);
+         this.facingOpposite = false;
+         targetFrame = this.myStatus + this.mySubStatus;
       }
-      if(this.myStatus == "surrender")
-      {
-         this.gotoAndStop(this.myStatus + this.mySubStatus);
-      }
-      if(this.myStatus == "dodge")
-      {
-         this.gotoAndStop(this.myStatus + this.mySubStatus);
-      }
-      if(this.myStatus == "use")
-      {
-         this.gotoAndStop(this.targetActivator.myAnimation);
-      }
-      if(this.myStatus == "swap")
-      {
-         this.gotoAndStop("swap");
-      }
-      if(this.myStatus == "backtrack")
-      {
-         this.gotoAndStop("backtrack");
-      }
-      if(this.myStatus == "incap")
-      {
-         this.gotoAndStop(this.myStatus + this.mySubStatus);
-      }
-      if(this.myStatus == "knockback")
-      {
-         this.gotoAndStop(this.myStatus + this.mySubStatus);
-      }
-      if(this.myStatus == "pickup")
-      {
-         this.gotoAndStop("pickup");
-      }
-      if(this.myStatus == "magic")
-      {
-         this.gotoAndStop("magic" + this.mySubStatus);
-      }
-      if(this.myStatus == "run" || this.myStatus == "idle" || this.myStatus == "backtrack")
-      {
-         if(this.mySubStatus.substr(0,8) == "_wounded")
-         {
-            this.facingOpposite = false;
-            this.gotoAndStop(this.myStatus + this.mySubStatus);
-         }
-      }
-      if(this.myStatus == "restrained")
-      {
-         this.gotoAndStop(this.myStatus + this.mySubStatus);
-      }
-      if(this.myStatus == "grapple")
-      {
-         this.gotoAndStop(this.myStatus + this.mySubStatus);
-      }
+
       if((this.myStatus == "use" || this.myStatus == "recover" || this.myStatus == "tactics" || this.myStatus.substr(0,7) == "execute" || this.myStatus.substr(0,5) == "melee" || this.myStatus.substr(0,7) == "unarmed" || this.myStatus.substr(0,7) == "deflect" || this.myStatus.substr(0,4) == "stun" || this.myStatus == "swap" || this.myStatus == "pickup" || this.myStatus == "magic" || this.myStatus == "knockback" || this.myStatus == "startup") && this.mySprite._currentframe >= this.mySprite._totalframes - 1)
       {
          if(this.myStatus.substr(0,7) == "execute")
@@ -1021,8 +980,14 @@ class MadnessCharacter extends MovieClip
             this.clearLockedAction("execute");
          }
          this.myStatus = "idle";
-         this.gotoAndStop("idle");
+         targetFrame = "idle";
       }
+
+      if(targetFrame != undefined)
+      {
+         this.gotoAndStop(targetFrame);
+      }
+
       MadnessCharacter.adjustSprite(this);
       this.aimFlashTimer = this.aimFlashTimer + 1;
       if(this.aimFlashTimer <= 5)
@@ -4246,7 +4211,8 @@ class MadnessCharacter extends MovieClip
    }
    function inputAllowed()
    {
-      if(this.myStatus.substr(0,4) == "dead" || this.myStatus.substr(0,5) == "dying" || this.doorLock || this.targetLock || this._parent.characterHold)
+      // 23/11/2026 dyzqy: Units who are actively dying or staggering won't receive AI updates.
+      if(this.myHealth <= 0 ||this.myStatus.substr(0,4) == "dead" || this.myStatus.substr(0,5) == "dying" || this.doorLock || this.targetLock || this._parent.characterHold)
       {
          return false;
       }
@@ -4735,6 +4701,12 @@ class MadnessCharacter extends MovieClip
             handNoneFrontCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
             handShootFrontCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
          }
+         // 23/11/2026 dyzqy: Moved this here so it is only ran when needed(aka when equipping a melee weapon)
+         //                   Tested, seems to be working fine :|>
+         ItemGenerator.setItemSprite(handNoneFrontCache.myGun.myMelee.mySprite,_loc2_);
+         ItemGenerator.setItemSprite(handNoneBackCache.myGun.myMelee.mySprite,_loc2_);
+         ItemGenerator.setItemSprite(handShootFrontCache.myGun.myMelee.mySprite,_loc2_);
+         ItemGenerator.setItemSprite(handShootBackCache.myGun.myMelee.mySprite,_loc2_);
       }
       else
       {
@@ -4786,7 +4758,7 @@ class MadnessCharacter extends MovieClip
       // 22/1/2026 dyzqy: gotoAndStop is a very expensive call! It is the reason for almost ALL lag in *most* flash games!
       //                  Limit it, contain it, etc.
       //           (TODO) Fix flashing of one of the hands being bugged for the player when going through doors(?) and holding rifles(?)
-      if(!setSkinsAlready)
+      if(!this.setSkinsAlready)
       {
          handNoneBackCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
          handNoneFrontCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
@@ -4804,7 +4776,7 @@ class MadnessCharacter extends MovieClip
          inChar.mySprite.myHand2.myHand.gotoAndStop(inChar.myDataRef.handType);
          inChar.mySprite.myHand.gotoAndStop(inChar.myDataRef.handType);
          inChar.mySprite.myHand2.gotoAndStop(inChar.myDataRef.handType);
-         setSkinsAlready = true;
+         this.setSkinsAlready = true;
       }
       if(inChar.blocking)
       {
@@ -5129,11 +5101,6 @@ class MadnessCharacter extends MovieClip
             }
          }
       }
-      // TODO: This doesn't need to be done every single time, yk...
-      ItemGenerator.setItemSprite(handNoneFrontCache.myGun.myMelee.mySprite,_loc2_);
-      ItemGenerator.setItemSprite(handNoneBackCache.myGun.myMelee.mySprite,_loc2_);
-      ItemGenerator.setItemSprite(handShootFrontCache.myGun.myMelee.mySprite,_loc2_);
-      ItemGenerator.setItemSprite(handShootBackCache.myGun.myMelee.mySprite,_loc2_);
       if(inChar.myWeapon == 0)
       {
          ItemGenerator.setItemSprite(bodyCache.myBackup.mySprite,inChar.myDataRef.myWeapons[1]);
@@ -5301,11 +5268,14 @@ class MadnessCharacter extends MovieClip
       {
          _loc2_ /= inMC.myDataRef.myScale;
       }
-      while(inMC._parent.getInstanceAtDepth(Math.floor(inNum * _loc2_ * 1000) + 100) != undefined)
+      // 23/11/2026 dyzqy: Holy this is hella inefficient, doing CRAZY AMOUNT of decimal point calculations per FRAME, per GRUNT
+      //            (TODO) Verify this doesn't break anything    
+      var depth:Number = Math.floor(inNum * _loc2_ * 1000) + 100;
+      while(inMC._parent.getInstanceAtDepth(depth) != undefined)
       {
-         inNum -= 0.001;
+         depth--;
       }
-      inMC.swapDepths(Math.floor(inNum * _loc2_ * 1000) + 100);
+      inMC.swapDepths(depth);
    }
    function findClosestObstacle()
    {

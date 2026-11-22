@@ -5,8 +5,10 @@ class SwainAudioPlayer
    static var currentTrack;
    static var soundManager;
    static var soundTypeArray;
-   static var allSounds;
-   static var allSoundsMCs;
+   static var freeChannels;
+   static var activeChannels;
+   static var soundChannelCount = 0;
+   static var initialPoolSize = 16;
    static var musicOn = true;
    static var volumeSound = 0.75;
    static var volumeMusic = 0.5;
@@ -21,15 +23,72 @@ class SwainAudioPlayer
       _root.createEmptyMovieClip("musicTrack2",_root.getNextHighestDepth());
       SwainAudioPlayer.musicTrack1 = _root.musicTrack1;
       SwainAudioPlayer.musicTrack2 = _root.musicTrack2;
+      SwainAudioPlayer.musicTrack1.mySound = new Sound(SwainAudioPlayer.musicTrack1);
+      SwainAudioPlayer.musicTrack2.mySound = new Sound(SwainAudioPlayer.musicTrack2);
       SwainAudioPlayer.currentTrack = SwainAudioPlayer.musicTrack1;
       SwainAudioPlayer.musicOn = true;
-      stopAllSounds();
+      SwainAudioPlayer.stopAllSounds();
       _root.createEmptyMovieClip("soundManager",_root.getNextHighestDepth());
       SwainAudioPlayer.soundManager = _root.soundManager;
       SwainAudioPlayer.soundManager.onEnterFrame = SwainAudioPlayer.soundTick;
       SwainAudioPlayer.soundTypeArray = new Array();
-      SwainAudioPlayer.allSounds = new Array();
-      SwainAudioPlayer.allSoundsMCs = new Array();
+      SwainAudioPlayer.freeChannels = new Array();
+      SwainAudioPlayer.activeChannels = new Array();
+      SwainAudioPlayer.soundChannelCount = 0;
+      var _loc1_ = 0;
+      while(_loc1_ < SwainAudioPlayer.initialPoolSize)
+      {
+         SwainAudioPlayer.freeChannels.push(SwainAudioPlayer.createChannel());
+         _loc1_ = _loc1_ + 1;
+      }
+   }
+   // 22/11/2026 dyzqy: Looping sounds is better than creating new ones every single time
+   static function createChannel()
+   {
+      var _loc1_ = SwainAudioPlayer.soundChannelCount++;
+      var _loc2_ = SwainAudioPlayer.soundManager.createEmptyMovieClip("soundMC_" + _loc1_,_loc1_);
+      var _loc3_ = new Sound(_loc2_);
+      var _loc4_ = {mc:_loc2_,snd:_loc3_,mySound:undefined,inUse:false};
+      _loc3_.onSoundComplete = function()
+      {
+         SwainAudioPlayer.releaseChannel(_loc4_);
+      };
+      return _loc4_;
+   }
+   static function getChannel()
+   {
+      var _loc1_ = undefined;
+      if(SwainAudioPlayer.freeChannels.length > 0)
+      {
+         _loc1_ = SwainAudioPlayer.freeChannels.pop();
+      }
+      else
+      {
+         _loc1_ = SwainAudioPlayer.createChannel();
+      }
+      _loc1_.inUse = true;
+      SwainAudioPlayer.activeChannels.push(_loc1_);
+      return _loc1_;
+   }
+   static function releaseChannel(inChannel)
+   {
+      if(inChannel == undefined || !inChannel.inUse)
+      {
+         return undefined;
+      }
+      inChannel.inUse = false;
+      inChannel.mySound = undefined;
+      var _loc1_ = 0;
+      while(_loc1_ < SwainAudioPlayer.activeChannels.length)
+      {
+         if(SwainAudioPlayer.activeChannels[_loc1_] == inChannel)
+         {
+            SwainAudioPlayer.activeChannels.splice(_loc1_,1);
+            break;
+         }
+         _loc1_ = _loc1_ + 1;
+      }
+      SwainAudioPlayer.freeChannels.push(inChannel);
    }
    static function playTrack(inTrack)
    {
@@ -63,9 +122,7 @@ class SwainAudioPlayer
          {
             SwainAudioPlayer.trackTick(tempTrack);
          };
-         SwainAudioPlayer.currentTrack.myTrack = new String();
          SwainAudioPlayer.currentTrack.myTrack = SwainAudioPlayer.soundLibrary(inTrack);
-         SwainAudioPlayer.currentTrack.mySound = new Sound(SwainAudioPlayer.currentTrack);
          SwainAudioPlayer.currentTrack.mySound.attachSound(SwainAudioPlayer.currentTrack.myTrack);
          SwainAudioPlayer.currentTrack.mySound.start(0,999999);
          SwainAudioPlayer.setTrackVolume(inTrack);
@@ -73,7 +130,7 @@ class SwainAudioPlayer
          {
             SwainAudioPlayer.currentTrack.mySound.setVolume(0);
          }
-         else if(SwainAudioPlayer.musicTrack2.mySound == undefined || SwainAudioPlayer.musicTrack1.mySound == undefined)
+         else if(SwainAudioPlayer.musicTrack2.myTrack == undefined || SwainAudioPlayer.musicTrack1.myTrack == undefined)
          {
             SwainAudioPlayer.currentTrack.mySound.setVolume(100 * SwainAudioPlayer.volumeMusic);
          }
@@ -85,8 +142,12 @@ class SwainAudioPlayer
    }
    static function stopTrack(inTrackObj)
    {
-      inTrackObj.mySound.stop(inTrackObj.myTrack);
-      inTrackObj.mySound = undefined;
+      if(inTrackObj == undefined)
+      {
+         return undefined;
+      }
+      inTrackObj.mySound.stop();
+      inTrackObj.mySound.setVolume(100);
       inTrackObj.myTrack = undefined;
       inTrackObj.onEnterFrame = null;
    }
@@ -157,45 +218,27 @@ class SwainAudioPlayer
          _loc1_ = _loc1_ + 1;
       }
       SwainAudioPlayer.soundTypeArray.push(inSound);
-      var _loc3_ = SwainAudioPlayer.soundManager.createEmptyMovieClip("soundMC" + SwainMath.randomNumber(0,99999),SwainAudioPlayer.soundManager.getNextHighestDepth());
-      _loc3_.newSound = new Sound(_loc3_);
-      _loc3_.mySound = inSound;
-      var newSound = _loc3_.newSound;
-      SwainAudioPlayer.allSounds.push(newSound);
-      SwainAudioPlayer.allSoundsMCs.push(_loc3_);
-      newSound.attachSound(SwainAudioPlayer.soundLibrary(inSound));
-      newSound.setPan(inPan);
-      newSound.setVolume((SwainAudioPlayer.returnVolume(inSound) - Math.abs(inPan * 0.5)) * SwainAudioPlayer.volumeSound);
-      newSound.start();
-      newSound.onSoundComplete = function()
-      {
-         var _loc1_ = 0;
-         while(_loc1_ < SwainAudioPlayer.allSounds.length)
-         {
-            if(newSound == SwainAudioPlayer.allSounds[_loc1_])
-            {
-               SwainAudioPlayer.allSoundsMCs[_loc1_].removeMovieClip();
-               SwainAudioPlayer.allSoundsMCs.splice(_loc1_,1);
-               SwainAudioPlayer.allSounds.splice(_loc1_,1);
-               delete newSound;
-               break;
-            }
-            _loc1_ = _loc1_ + 1;
-         }
-      };
+      var _loc2_ = SwainAudioPlayer.getChannel();
+      _loc2_.mySound = inSound;
+      var _loc3_ = _loc2_.snd;
+      _loc3_.stop();
+      _loc3_.setPan(0);
+      _loc3_.setVolume(100);
+      _loc3_.attachSound(SwainAudioPlayer.soundLibrary(inSound));
+      _loc3_.setPan(inPan);
+      _loc3_.setVolume((SwainAudioPlayer.returnVolume(inSound) - Math.abs(inPan * 0.5)) * SwainAudioPlayer.volumeSound);
+      _loc3_.start();
    }
    static function stopSound(inSound)
    {
       var _loc1_ = 0;
-      while(_loc1_ < SwainAudioPlayer.allSounds.length)
+      while(_loc1_ < SwainAudioPlayer.activeChannels.length)
       {
-         if(SwainAudioPlayer.allSoundsMCs[_loc1_].mySound == inSound)
+         var _loc2_ = SwainAudioPlayer.activeChannels[_loc1_];
+         if(_loc2_.mySound == inSound)
          {
-            SwainAudioPlayer.allSounds[_loc1_].stop();
-            delete SwainAudioPlayer.allSounds[_loc1_];
-            SwainAudioPlayer.allSoundsMCs[_loc1_].removeMovieClip();
-            SwainAudioPlayer.allSoundsMCs.splice(_loc1_,1);
-            SwainAudioPlayer.allSounds.splice(_loc1_,1);
+            _loc2_.snd.stop();
+            SwainAudioPlayer.releaseChannel(_loc2_);
             break;
          }
          _loc1_ = _loc1_ + 1;
@@ -203,15 +246,11 @@ class SwainAudioPlayer
    }
    static function stopAllSounds()
    {
-      while(SwainAudioPlayer.allSoundsMCs.length > 0)
+      while(SwainAudioPlayer.activeChannels.length > 0)
       {
-         SwainAudioPlayer.allSoundsMCs[0].removeMovieClip();
-         SwainAudioPlayer.allSoundsMCs.splice(0,1);
-      }
-      while(SwainAudioPlayer.allSounds.length > 0)
-      {
-         SwainAudioPlayer.allSounds[0].stop();
-         SwainAudioPlayer.allSounds.splice(0,1);
+         var _loc1_ = SwainAudioPlayer.activeChannels[SwainAudioPlayer.activeChannels.length - 1];
+         _loc1_.snd.stop();
+         SwainAudioPlayer.releaseChannel(_loc1_);
       }
    }
    static function soundLibrary(inName)

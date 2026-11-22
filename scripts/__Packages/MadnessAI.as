@@ -328,6 +328,7 @@ class MadnessAI
          {
             inChar.intendedX = inChar._x + SwainMath.randomNumber(-30,30);
             inChar.intendedY = inChar._y + SwainMath.randomNumber(-50,50);
+            // TODO: To fix or not to fix? This is a bug with the original game and I don't really wanna touch original game logic
             inChar.intendedRoom = MadnessAI.world.determineRoom(inChar.intendedY,inChar.intendedY);
             inChar.pathFind = true;
             inChar.ignoreRooms = false;
