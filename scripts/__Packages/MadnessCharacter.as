@@ -3445,12 +3445,15 @@ class MadnessCharacter extends MovieClip
       //                   The variables also include the value from the commented loops. Doing that multiple times a frame is unnecessary.
       var headFrame = 1 + this.headDamage * 5 + this.headSpray;
       var bodyFrame = 1 + this.bodyDamage * 5 + this.bodySpray;
+      // 23//11/2026 dyzqy: Fixed caching(thought I was in adjust sprite)
+      var dmgHeadSprite = this.mySprite.myHead.myPart.headSprite;
+      var dmgBodySprite = this.mySprite.myBody.myPart.bodySprite;
 
-      if(headCache.headSprite._currentframe != headFrame)
-         this.mySprite.myHead.headSprite.gotoAndStop(headFrame);
+      if(dmgHeadSprite._currentframe != headFrame)
+         dmgHeadSprite.gotoAndStop(headFrame);
       
-      if(bodyCache.bodySprite._currentframe != bodyFrame)
-         this.mySprite.myBody.bodySprite.gotoAndStop(bodyFrame);
+      if(dmgBodySprite._currentframe != bodyFrame)
+         dmgBodySprite.gotoAndStop(bodyFrame);
 
       // _loc7_ = 0;
       // while(_loc7_ < this.headSpray)
@@ -4560,7 +4563,11 @@ class MadnessCharacter extends MovieClip
       return inEnemy._x > this._x && this.isFacingRight || inEnemy._x < this._x && !this.isFacingRight;
    }
    var setSkinsAlready:Boolean = false;
-  static function adjustSprite(inChar)
+   var bodyBaseFrame:Number;
+   var headBaseFrame:Number;
+   var lastHeadType:String;
+   var lastBodyType:String;
+   static function adjustSprite(inChar)
    {
       MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.myHead,"Parts - Head");
       MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.myBody,"Parts - Body");
@@ -4572,9 +4579,57 @@ class MadnessCharacter extends MovieClip
       // 23/11/2026 dyzqy: Commented out nextFrame, replaced them with just one gotoAndStop
       var headExtraFrame:Boolean = !inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite;
       var bodyExtraFrame:Boolean = !inChar.isFacingRight || inChar.isFacingRight && inChar.myDataRef.myWeapons[inChar.myWeapon].twoHand && (inChar.myAimX <= inChar._x && inChar.isFacingRight || inChar.myAimX >= inChar._x && !inChar.isFacingRight) && inChar.reloadTimer == -1;
-      headCache.gotoAndStop(inChar.myDataRef.headType + headExtraFrame);
-      bodyCache.gotoAndStop(inChar.myDataRef.bodyType + bodyExtraFrame);
+      // var finalValue:Number = inChar.headBaseFrame + Number(headExtraFrame);
 
+      if(headCache != undefined && inChar.myDataRef.headType != undefined)
+      {
+         if(inChar.lastHeadType != inChar.myDataRef.headType || inChar.headBaseFrame == undefined)
+         {
+            headCache.gotoAndStop(inChar.myDataRef.headType);
+            if(headCache._currentframe != undefined)
+            {
+               inChar.headBaseFrame = headCache._currentframe;
+               inChar.lastHeadType = inChar.myDataRef.headType;
+               if(headExtraFrame)
+               {
+                  headCache.nextFrame();
+               }
+            }
+         }
+         else
+         {
+            var targetHead:Number = inChar.headBaseFrame + Number(headExtraFrame);
+            if(headCache._currentframe != targetHead)
+            {
+               headCache.gotoAndStop(targetHead);
+            }
+         }
+      }
+
+      if(bodyCache != undefined && inChar.myDataRef.bodyType != undefined)
+      {
+         if(inChar.lastBodyType != inChar.myDataRef.bodyType || inChar.bodyBaseFrame == undefined)
+         {
+            bodyCache.gotoAndStop(inChar.myDataRef.bodyType);
+            if(bodyCache._currentframe != undefined)
+            {
+               inChar.bodyBaseFrame = bodyCache._currentframe;
+               inChar.lastBodyType = inChar.myDataRef.bodyType;
+               if(bodyExtraFrame)
+               {
+                  bodyCache.nextFrame();
+               }
+            }
+         }
+         else
+         {
+            var targetBody:Number = inChar.bodyBaseFrame + Number(bodyExtraFrame);
+            if(bodyCache._currentframe != targetBody)
+            {
+               bodyCache.gotoAndStop(targetBody);
+            }
+         }
+      }
       // if(!inChar.isFacingRight || inChar.isFacingRight && inChar.myDataRef.myWeapons[inChar.myWeapon].twoHand && (inChar.myAimX <= inChar._x && inChar.isFacingRight || inChar.myAimX >= inChar._x && !inChar.isFacingRight) && inChar.reloadTimer == -1)
       // {
       //    bodyCache.nextFrame();
@@ -4620,8 +4675,8 @@ class MadnessCharacter extends MovieClip
          headCache._y = SwainMath.get_position(-5,34,bodyCache._rotation + 6 + (5 + _loc5_ / 2.5),36 - (5 + _loc5_ / 2.5) / 5,"y");
       }
       // 23/11/2026 dyzqy: Commented nextFrame(), implemented the bool directly into the gotoAndStop
-      headCache.headSprite.gotoAndStop(Math.max(1 + inChar.headDamage * 5, inChar.headSpray));
-      bodyCache.bodySprite.gotoAndStop(Math.max(1 + inChar.bodyDamage * 5, inChar.bodySpray));
+      headCache.headSprite.gotoAndStop(1 + inChar.headDamage * 5 + inChar.headSpray);
+      bodyCache.bodySprite.gotoAndStop(1 + inChar.bodyDamage * 5 + inChar.bodySpray);
       // var _loc4_ = 0;
       // while(_loc4_ < inChar.headSpray)
       // {

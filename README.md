@@ -9,9 +9,10 @@ You can install it right here: [click here](https://github.com/dyzqy/MPNc-Perfor
 ## Known bugs
 - Hands will flicker random skins(on certain weapons or actions)!
 - Obstacles don't really obsticl-ate your passing
-- Enemies flipping over??
+- Enemies flipping over?? (In the original game)
 - Enemies passing through level boundaries
-- Clips of guns ABOVE the gun?
+- Clips of guns ABOVE the gun? (In the original game)
+- AI likes to cling to walls?
 
 ## What is to optimize?
 So there is good news and bad news.
