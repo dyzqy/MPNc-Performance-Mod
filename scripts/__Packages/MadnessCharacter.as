@@ -3467,13 +3467,15 @@ class MadnessCharacter extends MovieClip
 
       if(this.myStatus != "restrained" && _loc3_ > 0 && this.myHealth > 0 && this.rofTimer > 5 && !this.myDataRef.bulletEater && !(this.myDataRef.amZombie && this.totalFrameDamage + _loc3_ < this.myHealthMax / 20 && !inWeapon.melee) && this.myStatus != "knockback" && !MadnessDataFile.havePerk("perkStunProof2",this.myDataRef) && !(MadnessDataFile.havePerk("perkStunProof1",this.myDataRef) && _loc3_ < 20))
       {
-         this.mySprite.gotoAndStop("idle");
+         // 23/11/2026 dyzqy: Commented out the unnecessary gotoAndStop. Why are we even doing it in the first place??
+         // this.mySprite.gotoAndStop("idle");
          this.myStatus = "stun" + SwainMath.randomNumber(1,7);
          this.mySprite.gotoAndStop(this.myStatus);
       }
       if(this.myHealth > 0 && inAttacker.myStatus.substr(0,10) == "melee_dash" && (this.myDataRef.weakToDash || MadnessDataFile.havePerk("perkStunDash1",inAttacker.myDataRef) && inAttacker.myDataRef.myScale >= this.myDataRef.myScale) && this.myStatus != "knockback")
       {
-         this.mySprite.gotoAndStop("idle");
+         // 23/11/2026 dyzqy: Commented out the unnecessary gotoAndStop. Why are we even doing it in the first place??
+         // this.mySprite.gotoAndStop("idle");
          this.myStatus = "stun_dash";
          this.mySprite.gotoAndStop(this.myStatus);
       }
@@ -4567,16 +4569,20 @@ class MadnessCharacter extends MovieClip
       var headCache = inChar.mySprite.myHead.myPart;
       var bodyCache = inChar.mySprite.myBody.myPart;
 
-      headCache.gotoAndStop(inChar.myDataRef.headType);
-      bodyCache.gotoAndStop(inChar.myDataRef.bodyType);
-      if(!inChar.isFacingRight || inChar.isFacingRight && inChar.myDataRef.myWeapons[inChar.myWeapon].twoHand && (inChar.myAimX <= inChar._x && inChar.isFacingRight || inChar.myAimX >= inChar._x && !inChar.isFacingRight) && inChar.reloadTimer == -1)
-      {
-         bodyCache.nextFrame();
-      }
-      if(!inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite)
-      {
-         headCache.nextFrame();
-      }
+      // 23/11/2026 dyzqy: Commented out nextFrame, replaced them with just one gotoAndStop
+      var headExtraFrame:Boolean = !inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite;
+      var bodyExtraFrame:Boolean = !inChar.isFacingRight || inChar.isFacingRight && inChar.myDataRef.myWeapons[inChar.myWeapon].twoHand && (inChar.myAimX <= inChar._x && inChar.isFacingRight || inChar.myAimX >= inChar._x && !inChar.isFacingRight) && inChar.reloadTimer == -1;
+      headCache.gotoAndStop(inChar.myDataRef.headType + headExtraFrame);
+      bodyCache.gotoAndStop(inChar.myDataRef.bodyType + bodyExtraFrame);
+
+      // if(!inChar.isFacingRight || inChar.isFacingRight && inChar.myDataRef.myWeapons[inChar.myWeapon].twoHand && (inChar.myAimX <= inChar._x && inChar.isFacingRight || inChar.myAimX >= inChar._x && !inChar.isFacingRight) && inChar.reloadTimer == -1)
+      // {
+      //    bodyCache.nextFrame();
+      // }
+      // if(!inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite)
+      // {
+      //    headCache.nextFrame();
+      // }
       if(inChar.isFacingRight && inChar.myDataRef.myWeapons[inChar.myWeapon].twoHand && inChar.facingOpposite)
       {
          bodyCache._xscale = -100;
@@ -4613,20 +4619,21 @@ class MadnessCharacter extends MovieClip
          headCache._x = SwainMath.get_position(-5,34,bodyCache._rotation + 6 + _loc5_ / 2.5,36,"x");
          headCache._y = SwainMath.get_position(-5,34,bodyCache._rotation + 6 + (5 + _loc5_ / 2.5),36 - (5 + _loc5_ / 2.5) / 5,"y");
       }
-      headCache.headSprite.gotoAndStop(1 + inChar.headDamage * 5);
-      bodyCache.bodySprite.gotoAndStop(1 + inChar.bodyDamage * 5);
-      var _loc4_ = 0;
-      while(_loc4_ < inChar.headSpray)
-      {
-         headCache.headSprite.nextFrame();
-         _loc4_ = _loc4_ + 1;
-      }
-      _loc4_ = 0;
-      while(_loc4_ < inChar.bodySpray)
-      {
-         bodyCache.bodySprite.nextFrame();
-         _loc4_ = _loc4_ + 1;
-      }
+      // 23/11/2026 dyzqy: Commented nextFrame(), implemented the bool directly into the gotoAndStop
+      headCache.headSprite.gotoAndStop(Math.max(1 + inChar.headDamage * 5, inChar.headSpray));
+      bodyCache.bodySprite.gotoAndStop(Math.max(1 + inChar.bodyDamage * 5, inChar.bodySpray));
+      // var _loc4_ = 0;
+      // while(_loc4_ < inChar.headSpray)
+      // {
+      //    headCache.headSprite.nextFrame();
+      //    _loc4_ = _loc4_ + 1;
+      // }
+      // _loc4_ = 0;
+      // while(_loc4_ < inChar.bodySpray)
+      // {
+      //    bodyCache.bodySprite.nextFrame();
+      //    _loc4_ = _loc4_ + 1;
+      // }
       if(MadnessGameSelect.gameMode == "arena" && MadnessGameSelect.subGameMode != "zombie" && inChar.myFaction == MadnessRoster.playerRoster.teamFaction && inChar.myDataRef != MadnessRoster.playerRoster.teamLeader)
       {
          bodyCache.teamColor._visible = true;
@@ -4891,21 +4898,28 @@ class MadnessCharacter extends MovieClip
             handNoneBackCache._visible = false;
             handShootBackCache._visible = true;
          }
-         handShootBackCache.myGun.gotoAndStop(inChar.rofLastFrame);
-         handShootFrontCache.myGun.gotoAndStop(inChar.rofLastFrame);
-         _loc4_ = handShootBackCache.myGun._currentframe;
-         while(_loc4_ < inChar.rofTimer + 1)
-         {
-            handShootBackCache.myGun.nextFrame();
-            _loc4_ = _loc4_ + 1;
-         }
-         handShootFrontCache.myGun.gotoAndStop(inChar.rofLastFrame);
-         _loc4_ = handShootFrontCache.myGun._currentframe;
-         while(_loc4_ < inChar.rofTimer + 1)
-         {
-            handShootFrontCache.myGun.nextFrame();
-            _loc4_ = _loc4_ + 1;
-         }
+         
+         // 23/11/2026 dyzqy: Caching the final value of the frame, rather than having multiple gotoAndStops/nextFrames, which are expensive operations
+         //                   Also trying to account for the total frames(may have to implement this to the previous change I've done as well?)
+         //                   Nevermind the last line, removed flawed stuff
+         //            (TODO) Verify this does not break anything related to "last frame"
+         var handsFrame = Math.max(inChar.rofLastFrame, inChar.rofTimer + 1); 
+
+         handShootBackCache.myGun.gotoAndStop(handsFrame);
+         handShootFrontCache.myGun.gotoAndStop(handsFrame);
+         // _loc4_ = handShootBackCache.myGun._currentframe;
+         // while(_loc4_ < inChar.rofTimer + 1)
+         // {
+         //    handShootBackCache.myGun.nextFrame();
+         //    _loc4_ = _loc4_ + 1;
+         // }
+         // handShootFrontCache.myGun.gotoAndStop(inChar.rofLastFrame);
+         // _loc4_ = handShootFrontCache.myGun._currentframe;
+         // while(_loc4_ < inChar.rofTimer + 1)
+         // {
+         //    handShootFrontCache.myGun.nextFrame();
+         //    _loc4_ = _loc4_ + 1;
+         // }
          if(handShootBackCache.myGun._currentframe != undefined)
          {
             inChar.rofLastFrame = handShootBackCache.myGun._currentframe;
@@ -4914,14 +4928,15 @@ class MadnessCharacter extends MovieClip
          {
             inChar.rofLastFrame = handShootFrontCache.myGun._currentframe;
          }
-         if(inChar.rofTimer + 1 > handShootBackCache.myGun._totalframes)
-         {
-            handShootBackCache.myGun.gotoAndStop(handShootBackCache.myGun._totalframes);
-         }
-         if(inChar.rofTimer + 1 > handShootFrontCache.myGun._totalframes)
-         {
-            handShootFrontCache.myGun.gotoAndStop(handShootFrontCache.myGun._totalframes);
-         }
+         // 23/11/2026 dyzqy: This is done automatically my flash, no need to manually do it
+         // if(inChar.rofTimer + 1 > handShootBackCache.myGun._totalframes)
+         // {
+         //    handShootBackCache.myGun.gotoAndStop(handShootBackCache.myGun._totalframes);
+         // }
+         // if(inChar.rofTimer + 1 > handShootFrontCache.myGun._totalframes)
+         // {
+         //    handShootFrontCache.myGun.gotoAndStop(handShootFrontCache.myGun._totalframes);
+         // }
          if(inChar.rofTimer < handShootFrontCache.myGun.myBlast._totalframes)
          {
             handShootFrontCache.myGun.myBlast.gotoAndStop(inChar.rofTimer);
@@ -5160,15 +5175,17 @@ class MadnessCharacter extends MovieClip
       }
       if(inChar.interactTarget != undefined)
       {
-         inChar.mySprite.hisHead.gotoAndStop(inChar.interactTarget.myDataRef.myCharacter);
-         inChar.mySprite.hisBody.gotoAndStop(inChar.interactTarget.myDataRef.myCharacter);
-         if(inChar.mySprite.flipPartner && inChar.isFacingRight)
-         {
-            inChar.mySprite.hisHead.nextFrame();
-            inChar.mySprite.hisBody.nextFrame();
-         }
+         // 23/11/2026 dyzqy: Adding the condition as a value(true booleans are 1)
+         //                   Better than nextFrame()!
+         inChar.mySprite.hisHead.gotoAndStop(inChar.interactTarget.myDataRef.myCharacter + (inChar.mySprite.flipPartner && inChar.isFacingRight));
+         inChar.mySprite.hisBody.gotoAndStop(inChar.interactTarget.myDataRef.myCharacter + (inChar.mySprite.flipPartner && inChar.isFacingRight));
          inChar.mySprite.hisHand.myHand.gotoAndStop(inChar.interactTarget.myDataRef.handType);
          inChar.mySprite.hisHand2.myHand.gotoAndStop(inChar.interactTarget.myDataRef.handType);
+         // if(inChar.mySprite.flipPartner && inChar.isFacingRight)
+         // {
+         //    inChar.mySprite.hisHead.nextFrame();
+         //    inChar.mySprite.hisBody.nextFrame();
+         // }
       }
       if(inChar.headDamage > 3 || inChar.myDataRef.myHat[inChar.myHat] == undefined)
       {
@@ -5193,6 +5210,7 @@ class MadnessCharacter extends MovieClip
          headCache.myMask._visible = true;
          if(inChar.myDataRef.myMask[inChar.myMask].flipMe)
          {
+            // TODO: See if this can be improved(most likely yes)
             if(inChar.isFacingRight)
             {
                headCache.myMask.gotoAndStop(inChar.myDataRef.myMask[inChar.myMask].myType + "_R");
