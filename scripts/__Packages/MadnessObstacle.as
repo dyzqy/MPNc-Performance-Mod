@@ -77,7 +77,7 @@ class MadnessObstacle extends MovieClip
          this.removeMe();
          this.amCover = false;
       }
-      // 23/11/2026 dyzqy: An obstacle is an immovable object... No need to change its depth every time :)
+      // 22/11/2026 dyzqy: An obstacle is an immovable object... No need to change its depth every time :)
       //            (TODO) Commented it! Verify it works.
       // MadnessCharacter.setMyDepth(this,this._yscale);
       if(!this.amCover)
@@ -189,7 +189,7 @@ class MadnessObstacle extends MovieClip
       {
          if(this == MadnessObstacle.allObstacles[_loc2_])
          {
-            // 23/11/2026 dyzqy: Fixed array leak! Removed the [_loc2_]
+            // 22/11/2026 dyzqy: Fixed array leak! Removed the [_loc2_]
             //            (TODO) Verify this didn't create any bugs
             MadnessObstacle.allObstacles.splice(_loc2_,1);
             break;

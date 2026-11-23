@@ -112,7 +112,7 @@ class MadnessCharacter extends MovieClip
    var mySpeedRight = new Number();
    var mySpeedDown = new Number();
    var myStatus = new String();
-   // 23/11/2026 dyzqy: A Boolean is faster to check than a String!
+   // 22/11/2026 dyzqy: A Boolean is faster to check than a String!
    var isFacingRight:Boolean = false;
    var facingOpposite = false;
    var myGameSpeed = new Number();
@@ -316,8 +316,8 @@ class MadnessCharacter extends MovieClip
    }
    function tick()
    {
-      // 22/11/2026 dyzqy: Offscreen culling.
-      // 23/11/2026 dyzqy: there's no such variable as camX or camY, am I crazy or what
+      // 21/11/2026 dyzqy: Offscreen culling.
+      // 22/11/2026 dyzqy: there's no such variable as camX or camY, am I crazy or what
       // var offScreen = (Math.abs(this._x - camX) > 950 || Math.abs(this._y - camY) > 650);
       // this._visible = !offScreen;
 
@@ -420,7 +420,7 @@ class MadnessCharacter extends MovieClip
       }
       if(this.myTacticsMax > 0)
       {
-         // 22/11/2026 dyzqy: You don't really need to check and do expensive operations every single frame, do you?
+         // 21/11/2026 dyzqy: You don't really need to check and do expensive operations every single frame, do you?
          if(this.tacDisplayTimer > 0)
          {
             var _loc2_ = 1;
@@ -838,7 +838,7 @@ class MadnessCharacter extends MovieClip
          }
       }
 
-      // 22/11/2026 dyzqy: No overlapping gotoAndStops, instead, save final value and make it *the* one!
+      // 21/11/2026 dyzqy: No overlapping gotoAndStops, instead, save final value and make it *the* one!
       this.facingOpposite = false;
       var targetFrame = undefined;
 
@@ -3439,20 +3439,32 @@ class MadnessCharacter extends MovieClip
       }
       this.myDataRef.headSpray = this.headSpray;
       this.myDataRef.bodySpray = this.bodySpray;
-      this.mySprite.myHead.headSprite.gotoAndStop(1 + this.headDamage * 5);
-      this.mySprite.myBody.bodySprite.gotoAndStop(1 + this.bodyDamage * 5);
-      _loc7_ = 0;
-      while(_loc7_ < this.headSpray)
-      {
-         this.mySprite.myHead.headSprite.nextFrame();
-         _loc7_ = _loc7_ + 1;
-      }
-      _loc7_ = 0;
-      while(_loc7_ < this.bodySpray)
-      {
-         this.mySprite.myBody.bodySprite.nextFrame();
-         _loc7_ = _loc7_ + 1;
-      }
+
+      // 23/11/2026 dyzqy: ONLY gotoAndStop when the frame is different. No need to do it everytime. Using the cached values as well.
+      //                   Added variables used to check if the frame is different before doing heavy function.
+      //                   The variables also include the value from the commented loops. Doing that multiple times a frame is unnecessary.
+      var headFrame = 1 + this.headDamage * 5 + this.headSpray;
+      var bodyFrame = 1 + this.bodyDamage * 5 + this.bodySpray;
+
+      if(headCache.headSprite._currentframe != headFrame)
+         this.mySprite.myHead.headSprite.gotoAndStop(headFrame);
+      
+      if(bodyCache.bodySprite._currentframe != bodyFrame)
+         this.mySprite.myBody.bodySprite.gotoAndStop(bodyFrame);
+
+      // _loc7_ = 0;
+      // while(_loc7_ < this.headSpray)
+      // {
+      //    this.mySprite.myHead.headSprite.nextFrame();
+      //    _loc7_ = _loc7_ + 1;
+      // }
+      // _loc7_ = 0;
+      // while(_loc7_ < this.bodySpray)
+      // {
+      //    this.mySprite.myBody.bodySprite.nextFrame();
+      //    _loc7_ = _loc7_ + 1;
+      // }
+
       if(this.myStatus != "restrained" && _loc3_ > 0 && this.myHealth > 0 && this.rofTimer > 5 && !this.myDataRef.bulletEater && !(this.myDataRef.amZombie && this.totalFrameDamage + _loc3_ < this.myHealthMax / 20 && !inWeapon.melee) && this.myStatus != "knockback" && !MadnessDataFile.havePerk("perkStunProof2",this.myDataRef) && !(MadnessDataFile.havePerk("perkStunProof1",this.myDataRef) && _loc3_ < 20))
       {
          this.mySprite.gotoAndStop("idle");
@@ -3949,7 +3961,7 @@ class MadnessCharacter extends MovieClip
                                  {
                                     if(!this.targetEnemy.deadMan && this.targetEnemy.myStatus.substr(0,3) != "use" && this.targetEnemy.myStatus != "knockback")
                                     {
-                                       // 23/11/2026 dyzqy: Fixed width calculations
+                                       // 22/11/2026 dyzqy: Fixed width calculations
                                        if(this.targetX < this.targetEnemy._x + this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100) * 0.5 && this.targetX > this.targetEnemy._x - this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100) * 0.5)
                                        {
                                           if(this.targetY < this.targetEnemy._y && this.targetY > this.targetEnemy._y - this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100))
@@ -3958,7 +3970,7 @@ class MadnessCharacter extends MovieClip
                                              _loc3_.x = this.targetX;
                                              _loc3_.y = this.targetY;
                                              this._parent.localToGlobal(_loc3_);
-                                             // 23/11/2026 dyzqy: Check the bounding box BEFORE checking the actual bounds
+                                             // 22/11/2026 dyzqy: Check the bounding box BEFORE checking the actual bounds
                                              if(this.targetEnemy.mySprite.hitTest(_loc3_.x,_loc3_.y,false) && ((this.targetEnemy.headDamage <= 3 || this.targetEnemy.myDataRef.bulletEater) && (_loc12_ = this.targetEnemy.mySprite.myHead.myHit.hitTest(_loc3_.x,_loc3_.y,true)) || this.targetEnemy.mySprite.myBody.myHit.hitTest(_loc3_.x,_loc3_.y,true)))
                                              {
                                                 var _loc18_ = SwainMath.randomNumber(0,99999);
@@ -4215,7 +4227,7 @@ class MadnessCharacter extends MovieClip
    }
    function inputAllowed()
    {
-      // 23/11/2026 dyzqy: Units who are actively dying or staggering won't receive AI updates.
+      // 22/11/2026 dyzqy: Units who are actively dying or staggering won't receive AI updates.
       if(this.myHealth <= 0 ||this.myStatus.substr(0,4) == "dead" || this.myStatus.substr(0,5) == "dying" || this.doorLock || this.targetLock || this._parent.characterHold)
       {
          return false;
@@ -4551,7 +4563,7 @@ class MadnessCharacter extends MovieClip
       MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.myHead,"Parts - Head");
       MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.myBody,"Parts - Body");
       
-      // 22/11/2026 dyzqy: Caching sprites paths because AVM1 doesn't know how to do it and calculates it every single time.
+      // 21/11/2026 dyzqy: Caching sprites paths because AVM1 doesn't know how to do it and calculates it every single time.
       var headCache = inChar.mySprite.myHead.myPart;
       var bodyCache = inChar.mySprite.myBody.myPart;
 
@@ -4654,7 +4666,7 @@ class MadnessCharacter extends MovieClip
       MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.handShoot_back,"character_hand");
       MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.handShoot_front,"character_hand");
 
-      // 22/11/2026 dyzqy: Caching sprites...
+      // 21/11/2026 dyzqy: Caching sprites...
       var handNoneFrontCache = inChar.mySprite.handNone_front;
       var handShootFrontCache = inChar.mySprite.handShoot_front;
       var handNoneBackCache = inChar.mySprite.handNone_back;
@@ -4705,7 +4717,7 @@ class MadnessCharacter extends MovieClip
             handNoneFrontCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
             handShootFrontCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
          }
-         // 23/11/2026 dyzqy: Moved this here so it is only ran when needed(aka when equipping a melee weapon)
+         // 22/11/2026 dyzqy: Moved this here so it is only ran when needed(aka when equipping a melee weapon)
          //                   Tested, seems to be working fine :|>
          ItemGenerator.setItemSprite(handNoneFrontCache.myGun.myMelee.mySprite,_loc2_);
          ItemGenerator.setItemSprite(handNoneBackCache.myGun.myMelee.mySprite,_loc2_);
@@ -4822,21 +4834,30 @@ class MadnessCharacter extends MovieClip
             handNoneBackCache._visible = false;
             handShootBackCache._visible = true;
          }
-         handShootBackCache.myGun.gotoAndStop(inChar.rofLastFrame);
-         handShootFrontCache.myGun.gotoAndStop(inChar.rofLastFrame);
-         _loc4_ = handShootBackCache.myGun._currentframe;
-         while(_loc4_ < inChar.reloadTimer + 1)
-         {
-            handShootBackCache.myGun.nextFrame();
-            _loc4_ = _loc4_ + 1;
-         }
-         handShootFrontCache.myGun.gotoAndStop(inChar.rofLastFrame);
-         _loc4_ = handShootFrontCache.myGun._currentframe;
-         while(_loc4_ < inChar.reloadTimer + 1)
-         {
-            handShootFrontCache.myGun.nextFrame();
-            _loc4_ = _loc4_ + 1;
-         }
+         
+         // 23/11/2026 dyzqy: Caching the final value of the frame, rather than having multiple gotoAndStops/nextFrames, which are expensive operations
+         //                   Also trying to account for the total frames(may have to implement this to the previous change I've done as well?)
+         //                   Nevermind the last line, removed flawed stuff
+         //            (TODO) Verify this does not break anything related to "last frame"
+         var handsFrame = Math.max(inChar.rofLastFrame, inChar.reloadTimer + 1); 
+
+         handShootBackCache.myGun.gotoAndStop(handsFrame);
+         handShootFrontCache.myGun.gotoAndStop(handsFrame);
+         
+         // _loc4_ = handShootBackCache.myGun._currentframe;
+         // while(_loc4_ < inChar.reloadTimer + 1)
+         // {
+         //    handShootBackCache.myGun.nextFrame();
+         //    _loc4_ = _loc4_ + 1;
+         // }
+         // handShootFrontCache.myGun.gotoAndStop(inChar.rofLastFrame);
+         // _loc4_ = handShootFrontCache.myGun._currentframe;
+         // while(_loc4_ < inChar.reloadTimer + 1)
+         // {
+         //    handShootFrontCache.myGun.nextFrame();
+         //    _loc4_ = _loc4_ + 1;
+         // }
+
          if(handShootBackCache.myGun._currentframe != undefined)
          {
             inChar.rofLastFrame = handShootBackCache.myGun._currentframe;
@@ -4845,14 +4866,14 @@ class MadnessCharacter extends MovieClip
          {
             inChar.rofLastFrame = handShootFrontCache.myGun._currentframe;
          }
-         if(inChar.reloadTimer + 1 > handShootBackCache.myGun._totalframes)
-         {
-            handShootBackCache.myGun.gotoAndStop(handShootBackCache.myGun._totalframes);
-         }
-         if(inChar.reloadTimer + 1 > handShootFrontCache.myGun._totalframes)
-         {
-            handShootFrontCache.myGun.gotoAndStop(handShootFrontCache.myGun._totalframes);
-         }
+         // if(inChar.reloadTimer + 1 > handShootBackCache.myGun._totalframes)
+         // {
+         //    handShootBackCache.myGun.gotoAndStop(handShootBackCache.myGun._totalframes);
+         // }
+         // if(inChar.reloadTimer + 1 > handShootFrontCache.myGun._totalframes)
+         // {
+         //    handShootFrontCache.myGun.gotoAndStop(handShootFrontCache.myGun._totalframes);
+         // }
       }
       else if(inChar.aimTimer > -1 || _loc2_ != undefined && inChar.rofTimer < _loc2_.myROF + inChar.shootWaitBuffer && (inChar.myStatus == "incap" || inChar.myStatus == "cover" || inChar.myStatus == "idle" || inChar.myStatus == "run" || inChar.myStatus == "backtrack" || inChar.myStatus == "dash" || inChar.myStatus == "tactics"))
       {
@@ -5272,7 +5293,7 @@ class MadnessCharacter extends MovieClip
       {
          _loc2_ /= inMC.myDataRef.myScale;
       }
-      // 23/11/2026 dyzqy: Holy this is hella inefficient, doing CRAZY AMOUNT of decimal point calculations per FRAME, per GRUNT
+      // 22/11/2026 dyzqy: Holy this is hella inefficient, doing CRAZY AMOUNT of decimal point calculations per FRAME, per GRUNT
       //            (TODO) Verify this doesn't break anything    
       var depth:Number = Math.floor(inNum * _loc2_ * 1000) + 100;
       while(inMC._parent.getInstanceAtDepth(depth) != undefined)

@@ -407,7 +407,7 @@ class MadnessParticle extends MovieClip
             this.finished = true;
             this.cacheAsBitmap = true;
             this.killMe("bmpBodies");
-            // 23/11/2026 dyzqy: No need to run the rest when it has already been deleted!
+            // 22/11/2026 dyzqy: No need to run the rest when it has already been deleted!
             return;
          }
       }
@@ -564,7 +564,7 @@ class MadnessParticle extends MovieClip
          }
          else if(this.myCategory == "sparks")
          {
-            // 23/112026 dyzqy: Deleting enterframe stuff
+            // 22/112026 dyzqy: Deleting enterframe stuff
             delete this.onEnterFrame;
             this.removeMovieClip();
          }
