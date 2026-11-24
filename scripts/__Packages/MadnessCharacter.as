@@ -339,8 +339,8 @@ class MadnessCharacter extends MovieClip
       else if(!MadnessTransition.transitionLock && this.inputAllowed() && !this.myDataRef.standStill)
       {
          // 21/11/2026 dyzqy: Limit the AI calls, it is quite expensive... 
-         //                   There's no need to do this!
-            MadnessAI.setActions(this);
+         // 24/11/2026 dyzqy: There's no need to do this!
+         MadnessAI.setActions(this);
       }
       if(this._alpha < 100)
       {
@@ -2094,7 +2094,8 @@ class MadnessCharacter extends MovieClip
          if(this.myMash._alpha <= 0)
          {
             this.myMash._alpha = 0;
-            this.myMash.gotoAndStop(1);
+            // 24/11/2026 dyzqy: If it is invisible, there is no need to change its current frame!
+            // this.myMash.gotoAndStop(1);
             this.myMash._visible = false;
          }
       }
@@ -3651,6 +3652,7 @@ class MadnessCharacter extends MovieClip
    }
    static function checkWounds(inChar)
    {
+      // TODO: Improve the performance of this.
       var _loc2_ = 0;
       while(_loc2_ < inChar.myDataRef.bodyWounds.length)
       {
@@ -4564,6 +4566,9 @@ class MadnessCharacter extends MovieClip
    var setSkinsAlready:Boolean = false;
    var bodyBaseFrame:Number;
    var headBaseFrame:Number;
+   var hisBodyBaseFrame:Number;
+   var hisHeadBaseFrame:Number;
+   var handTypeFrame:Number;
    var lastHeadType:String;
    var lastBodyType:String;
    static function adjustSprite(inChar)
@@ -4597,7 +4602,9 @@ class MadnessCharacter extends MovieClip
          }
          else
          {
-            var targetHead:Number = inChar.headBaseFrame + Number(headExtraFrame);
+            // 24/11/2026 dyzqy: Fixed the bug where facing right would have the wrong skins
+            //                   And also the bugs where entering a room/space won't have your skins equipped
+            var targetHead:Number = inChar.headBaseFrame + (headExtraFrame ? 1 : 0);
             if(headCache._currentframe != targetHead)
             {
                headCache.gotoAndStop(targetHead);
@@ -4622,7 +4629,7 @@ class MadnessCharacter extends MovieClip
          }
          else
          {
-            var targetBody:Number = inChar.bodyBaseFrame + Number(bodyExtraFrame);
+            var targetBody:Number = inChar.bodyBaseFrame + (bodyExtraFrame ? 1 : 0);
             if(bodyCache._currentframe != targetBody)
             {
                bodyCache.gotoAndStop(targetBody);
@@ -4674,8 +4681,14 @@ class MadnessCharacter extends MovieClip
          headCache._y = SwainMath.get_position(-5,34,bodyCache._rotation + 6 + (5 + _loc5_ / 2.5),36 - (5 + _loc5_ / 2.5) / 5,"y");
       }
       // 23/11/2026 dyzqy: Commented nextFrame(), implemented the bool directly into the gotoAndStop
-      headCache.headSprite.gotoAndStop(1 + inChar.headDamage * 5 + inChar.headSpray);
-      bodyCache.bodySprite.gotoAndStop(1 + inChar.bodyDamage * 5 + inChar.bodySpray);
+      // 24/11/2026 dyzqy: There is also no need to be running it every single frame, only when it changes!
+      var targetFrame:Number = 1 + inChar.headDamage * 5 + inChar.headSpray;
+      if(headCache.headSprite._currentframe != targetFrame)
+         headCache.headSprite.gotoAndStop(targetFrame);
+      
+      targetFrame = 1 + inChar.bodyDamage * 5 + inChar.bodySpray;
+      if(bodyCache.bodySprite._currentframe != targetFrame)
+         bodyCache.bodySprite.gotoAndStop(targetFrame);
       // var _loc4_ = 0;
       // while(_loc4_ < inChar.headSpray)
       // {
@@ -4693,34 +4706,40 @@ class MadnessCharacter extends MovieClip
          bodyCache.teamColor._visible = true;
          bodyCache.teamColor.gotoAndStop("green");
       }
-      else
+      else if(bodyCache.teamColor._visible)
       {
+         // 24/11/2026 dyqy: There is no need to check this every single frame. 
+         //                  Only if it is visible do we stop it and make it invisible.
          bodyCache.teamColor._visible = false;
          bodyCache.teamColor.stop();
       }
+      // 24/11/2026 dyzqy: Changed the ifs to else ifs. Why are we even using ifs :sob:
       var _loc9_ = undefined;
       if(inChar.myWeapon == 0)
       {
          _loc9_ = 1;
       }
-      if(inChar.myWeapon == 1)
+      else if(inChar.myWeapon == 1)
       {
          _loc9_ = 0;
       }
-      if(inChar.myWeapon == 2)
+      else if(inChar.myWeapon == 2)
       {
          _loc9_ = 99;
       }
       if(inChar.myDataRef.myWeapons[_loc9_] == undefined)
       {
          bodyCache.myBackup._visible = false;
-         bodyCache.myBackup.gotoAndStop("none");
+         // 24/11/2026 dyzqy: If the object is not visible, there is no need to update it!
+         // bodyCache.myBackup.gotoAndStop("none");
       }
-      else
+      else// if(!bodyCache.myBackup._visible || inChar.lastBackupType != _loc10_.myType)
       {
-         bodyCache.myBackup._visible = true;
+         // 24/11/2026 dyzqy: Just moved the lines a bit.
+         // 24/11/2026 dyzqy: If it isn't visible, then it hasn't been set, if it is visible it has been set, no need to do so again!
          bodyCache.myBackup.gotoAndStop(inChar.myDataRef.myWeapons[_loc9_].myType);
          bodyCache.myBackup.myGun = inChar.myDataRef.myWeapons[_loc9_];
+         bodyCache.myBackup._visible = true;
       }
       MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.handNone_back,"character_hand");
       MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.handNone_front,"character_hand");
@@ -4753,10 +4772,14 @@ class MadnessCharacter extends MovieClip
             {
                MadnessCharacter.makeSpritePart(inChar,handNoneFrontCache,_loc2_.myTag + " - Block");
             }
-            handNoneFrontCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
-            handNoneFrontCache.myGun.myHand.gotoAndStop("hand_back");
-            handNoneFrontCache.myGun.myHand2.gotoAndStop("hand_back");
-            handNoneFrontCache.myGun.gotoAndStop(inChar.actionTimer);
+            // 24/11/2026 dyzqy: No need to change frames if already on the desired frames!
+            if(handNoneFrontCache.myGun._currentframe != inChar.actionTimer)
+            {
+               handNoneFrontCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
+               handNoneFrontCache.myGun.myHand.gotoAndStop("hand_back");
+               handNoneFrontCache.myGun.myHand2.gotoAndStop("hand_back");
+               handNoneFrontCache.myGun.gotoAndStop(inChar.actionTimer);
+            }
          }
          else if(!inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite)
          {
@@ -4764,10 +4787,14 @@ class MadnessCharacter extends MovieClip
             MadnessCharacter.makeSpritePart(inChar,handNoneFrontCache,"remove");
             MadnessCharacter.makeSpritePart(inChar,handShootBackCache,_loc2_.myTag + " - L");
             MadnessCharacter.makeSpritePart(inChar,handShootFrontCache,"remove");
-            handNoneBackCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
-            handShootBackCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
-            handNoneFrontCache.gotoAndStop("hand_front");
-            handShootFrontCache.gotoAndStop("hand_front");
+            // 24/11/2026 dyzqy: No need to change frames if already on the desired frames!
+            if(handNoneBackCache.myGun.myMelee._currentframe != _loc2_.myType)
+            {
+               handNoneBackCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
+               handShootBackCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
+               handNoneFrontCache.gotoAndStop("hand_front");
+               handShootFrontCache.gotoAndStop("hand_front");
+            }
          }
          else if(inChar.isFacingRight && !inChar.facingOpposite || !inChar.isFacingRight && inChar.facingOpposite)
          {
@@ -4775,8 +4802,12 @@ class MadnessCharacter extends MovieClip
             MadnessCharacter.makeSpritePart(inChar,handNoneBackCache,"remove");
             MadnessCharacter.makeSpritePart(inChar,handShootFrontCache,_loc2_.myTag + " - R");
             MadnessCharacter.makeSpritePart(inChar,handShootBackCache,"remove");
-            handNoneFrontCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
-            handShootFrontCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
+            // 24/11/2026 dyzqy: No need to change frames if already on the desired frames!
+            if(handNoneFrontCache.myGun.myMelee._currentframe != _loc2_.myType)
+            {
+               handNoneFrontCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
+               handShootFrontCache.myGun.myMelee.gotoAndStop(_loc2_.myType);
+            }
          }
          // 22/11/2026 dyzqy: Moved this here so it is only ran when needed(aka when equipping a melee weapon)
          //                   Tested, seems to be working fine :|>
@@ -4827,34 +4858,37 @@ class MadnessCharacter extends MovieClip
       }
       else
       {
+         // 24/11/2026 dyzqy: TODO
          handNoneBackCache.myHandSprite.gotoAndStop("hand_back");
          handShootBackCache.myHandSprite.gotoAndStop("hand_back");
          handNoneFrontCache.myHandSprite.gotoAndStop("hand_front");
          handShootFrontCache.myHandSprite.gotoAndStop("hand_front");
       }
-      // 22/1/2026 dyzqy: gotoAndStop is a very expensive call! It is the reason for almost ALL lag in *most* flash games!
+      // 22/11/2026 dyzqy: gotoAndStop is a very expensive call! It is the reason for almost ALL lag in *most* flash games!
       //                  Limit it, contain it, etc.
       //           (TODO) Fix flashing of one of the hands being bugged for the player when going through doors(?) and holding rifles(?)
-      if(!inChar.setSkinsAlready)
-      {
-         handNoneBackCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
-         handNoneFrontCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
-         handShootBackCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
-         handShootFrontCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
-         handNoneBackCache.myGun.myHand.gotoAndStop(inChar.myDataRef.handType);
-         handNoneBackCache.myGun.myHand2.gotoAndStop(inChar.myDataRef.handType);
-         handNoneFrontCache.myGun.myHand.gotoAndStop(inChar.myDataRef.handType);
-         handNoneFrontCache.myGun.myHand2.gotoAndStop(inChar.myDataRef.handType);
-         handShootBackCache.myGun.myHand.gotoAndStop(inChar.myDataRef.handType);
-         handShootBackCache.myGun.myHand2.gotoAndStop(inChar.myDataRef.handType);
-         handShootFrontCache.myGun.myHand.gotoAndStop(inChar.myDataRef.handType);
-         handShootFrontCache.myGun.myHand2.gotoAndStop(inChar.myDataRef.handType);
-         inChar.mySprite.myHand.myHand.gotoAndStop(inChar.myDataRef.handType);
-         inChar.mySprite.myHand2.myHand.gotoAndStop(inChar.myDataRef.handType);
-         inChar.mySprite.myHand.gotoAndStop(inChar.myDataRef.handType);
-         inChar.mySprite.myHand2.gotoAndStop(inChar.myDataRef.handType);
-         inChar.setSkinsAlready = true;
-      }
+      // 24/11/2026 dyzqy: Removed the if statement, will come back to improve this later! 
+      // 24/11/2026 dyzqy: TODO:
+      handNoneBackCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
+      handNoneFrontCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
+      handShootBackCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
+      handShootFrontCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
+      handNoneBackCache.myGun.myHand.gotoAndStop(inChar.myDataRef.handType);
+      handNoneBackCache.myGun.myHand2.gotoAndStop(inChar.myDataRef.handType);
+      handNoneFrontCache.myGun.myHand.gotoAndStop(inChar.myDataRef.handType);
+      handNoneFrontCache.myGun.myHand2.gotoAndStop(inChar.myDataRef.handType);
+      handShootBackCache.myGun.myHand.gotoAndStop(inChar.myDataRef.handType);
+      handShootBackCache.myGun.myHand2.gotoAndStop(inChar.myDataRef.handType);
+      handShootFrontCache.myGun.myHand.gotoAndStop(inChar.myDataRef.handType);
+      handShootFrontCache.myGun.myHand2.gotoAndStop(inChar.myDataRef.handType);
+      inChar.mySprite.myHand.myHand.gotoAndStop(inChar.myDataRef.handType);
+      inChar.mySprite.myHand2.myHand.gotoAndStop(inChar.myDataRef.handType);
+      inChar.mySprite.myHand.gotoAndStop(inChar.myDataRef.handType);
+      inChar.mySprite.myHand2.gotoAndStop(inChar.myDataRef.handType);
+      // if(!inChar.setSkinsAlready)
+      // {
+      //    inChar.setSkinsAlready = true;
+      // }
       if(inChar.blocking)
       {
          handNoneFrontCache._visible = true;
@@ -4900,24 +4934,30 @@ class MadnessCharacter extends MovieClip
          //                   Also trying to account for the total frames(may have to implement this to the previous change I've done as well?)
          //                   Nevermind the last line, removed flawed stuff
          //            (TODO) Verify this does not break anything related to "last frame"
-         var handsFrame = Math.max(inChar.rofLastFrame, inChar.reloadTimer + 1); 
+         // var handsFrame = Math.max(inChar.rofLastFrame, inChar.reloadTimer + 1); 
 
-         handShootBackCache.myGun.gotoAndStop(handsFrame);
-         handShootFrontCache.myGun.gotoAndStop(handsFrame);
+         // 24/11/2026 dyzqy: Check if it is visible and if it isn't already on that frame before running it!
+         // 24/11/2026 dyzqy: AS2 frames are important since they contain the actions that reload, so can't skip the next frames.
+         //                   This fixed the reloading bug!
+         if(handShootBackCache._visible && handShootBackCache.myGun._currentframe != inChar.rofLastFrame)
+            handShootBackCache.myGun.gotoAndStop(inChar.rofLastFrame);
+            
+         if(handShootFrontCache._visible && handShootFrontCache.myGun._currentframe != inChar.rofLastFrame)
+            handShootFrontCache.myGun.gotoAndStop(inChar.rofLastFrame);
          
-         // _loc4_ = handShootBackCache.myGun._currentframe;
-         // while(_loc4_ < inChar.reloadTimer + 1)
-         // {
-         //    handShootBackCache.myGun.nextFrame();
-         //    _loc4_ = _loc4_ + 1;
-         // }
-         // handShootFrontCache.myGun.gotoAndStop(inChar.rofLastFrame);
-         // _loc4_ = handShootFrontCache.myGun._currentframe;
-         // while(_loc4_ < inChar.reloadTimer + 1)
-         // {
-         //    handShootFrontCache.myGun.nextFrame();
-         //    _loc4_ = _loc4_ + 1;
-         // }
+         _loc4_ = handShootBackCache.myGun._currentframe;
+         while(_loc4_ < inChar.reloadTimer + 1)
+         {
+            handShootBackCache.myGun.nextFrame();
+            _loc4_ = _loc4_ + 1;
+         }
+         handShootFrontCache.myGun.gotoAndStop(inChar.rofLastFrame);
+         _loc4_ = handShootFrontCache.myGun._currentframe;
+         while(_loc4_ < inChar.reloadTimer + 1)
+         {
+            handShootFrontCache.myGun.nextFrame();
+            _loc4_ = _loc4_ + 1;
+         }
 
          if(handShootBackCache.myGun._currentframe != undefined)
          {
@@ -4959,8 +4999,12 @@ class MadnessCharacter extends MovieClip
          //            (TODO) Verify this does not break anything related to "last frame"
          var handsFrame = Math.max(inChar.rofLastFrame, inChar.rofTimer + 1); 
 
-         handShootBackCache.myGun.gotoAndStop(handsFrame);
-         handShootFrontCache.myGun.gotoAndStop(handsFrame);
+         // 24/11/2026 dyzqy: Check if it is visible and if it isn't already on that frame before running it!
+         if(handShootBackCache._visible && handShootBackCache.myGun._currentframe != handsFrame)
+            handShootBackCache.myGun.gotoAndStop(handsFrame);
+            
+         if(handShootFrontCache._visible && handShootFrontCache.myGun._currentframe != handsFrame)
+            handShootFrontCache.myGun.gotoAndStop(handsFrame);
          // _loc4_ = handShootBackCache.myGun._currentframe;
          // while(_loc4_ < inChar.rofTimer + 1)
          // {
@@ -4991,6 +5035,7 @@ class MadnessCharacter extends MovieClip
          // {
          //    handShootFrontCache.myGun.gotoAndStop(handShootFrontCache.myGun._totalframes);
          // }
+         // 24/11/2026 dyzqy: TODO: Check if this even needs a current frame check
          if(inChar.rofTimer < handShootFrontCache.myGun.myBlast._totalframes)
          {
             handShootFrontCache.myGun.myBlast.gotoAndStop(inChar.rofTimer);
@@ -5008,15 +5053,17 @@ class MadnessCharacter extends MovieClip
          handShootFrontCache._visible = false;
          if(_loc2_ != undefined)
          {
-            if(!inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite)
+            // 24/11/2026 dyzqy: Check if you even need to set it before setting it.
+            if(handNoneBackCache.myGun._currentframe != 1 && (!inChar.isFacingRight && !inChar.facingOpposite || inChar.isFacingRight && inChar.facingOpposite))
             {
                handNoneBackCache.myGun.gotoAndStop(1);
             }
-            else
+            else if(handNoneFrontCache.myGun._currentframe != 1)
             {
                handNoneFrontCache.myGun.gotoAndStop(1);
             }
          }
+         // 24/11/2026 dyzqy: TODO: Check if this even needs a current frame check
          if(inChar.rofTimer < handNoneFrontCache.myGun.myBlast._totalframes)
          {
             handNoneFrontCache.myGun.myBlast.gotoAndStop(inChar.rofTimer);
@@ -5231,10 +5278,45 @@ class MadnessCharacter extends MovieClip
       {
          // 23/11/2026 dyzqy: Adding the condition as a value(true booleans are 1)
          //                   Better than nextFrame()!
-         inChar.mySprite.hisHead.gotoAndStop(inChar.interactTarget.myDataRef.myCharacter + (inChar.mySprite.flipPartner && inChar.isFacingRight));
-         inChar.mySprite.hisBody.gotoAndStop(inChar.interactTarget.myDataRef.myCharacter + (inChar.mySprite.flipPartner && inChar.isFacingRight));
-         inChar.mySprite.hisHand.myHand.gotoAndStop(inChar.interactTarget.myDataRef.handType);
-         inChar.mySprite.hisHand2.myHand.gotoAndStop(inChar.interactTarget.myDataRef.handType);
+         // 24/11/2026 dyzqy: The usual checks before going and stopping :)
+         if(inChar.hisHeadBaseFrame == undefined)
+         {
+            inChar.mySprite.hisHead.gotoAndStop(inChar.interactTarget.myDataRef.myCharacter);
+            inChar.hisHeadBaseFrame = inChar.mySprite.hisHead._currentframe;
+            inChar.mySprite.hisBody.gotoAndStop(inChar.interactTarget.myDataRef.myCharacter);
+            inChar.hisBodyBaseFrame = inChar.mySprite.hisBody._currentframe;
+
+            if(inChar.mySprite.flipPartner && inChar.isFacingRight)
+            {
+               inChar.mySprite.hisHead.nextFrame();
+               inChar.mySprite.hisBody.nextFrame();
+            }
+         }
+         else
+         {
+            var finalFrame = inChar.hisHeadBaseFrame + Number(inChar.mySprite.flipPartner && inChar.isFacingRight);
+            if(finalFrame != inChar.mySprite.hisHead._currentframe)
+            {
+               inChar.mySprite.hisHead.gotoAndStop(finalFrame);
+            }
+            finalFrame = inChar.hisBodyBaseFrame + Number(inChar.mySprite.flipPartner && inChar.isFacingRight);
+            if(finalFrame != inChar.mySprite.hisBody._currentframe)
+            {
+               inChar.mySprite.hisBody.gotoAndStop(finalFrame);
+            }
+         }
+         if(inChar.handTypeFrame == undefined)
+         {
+            inChar.mySprite.hisHand.myHand.gotoAndStop(inChar.interactTarget.myDataRef.handType);
+            inChar.mySprite.hisHand2.myHand.gotoAndStop(inChar.interactTarget.myDataRef.handType);
+            inChar.handTypeFrame = inChar.mySprite.hisHand2.myHand._currentframe;
+            trace("TEST VALUE " + inChar.mySprite.hisHand.myHand._currentframe + " " + inChar.mySprite.hisHand2.myHand._currentframe);
+         }
+         else if(inChar.mySprite.hisHand.myHand._currentframe != inChar.handTypeFrame)
+         {
+            inChar.mySprite.hisHand.myHand.gotoAndStop(inChar.handTypeFrame);
+            inChar.mySprite.hisHand2.myHand.gotoAndStop(inChar.handTypeFrame);
+         }
          // if(inChar.mySprite.flipPartner && inChar.isFacingRight)
          // {
          //    inChar.mySprite.hisHead.nextFrame();
