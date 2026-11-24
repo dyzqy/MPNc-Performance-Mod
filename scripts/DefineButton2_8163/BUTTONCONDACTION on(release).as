@@ -1,3 +1,0 @@
-on(release){
-   pressDone("regular");
-}

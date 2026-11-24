@@ -1,3 +1,0 @@
-on(press){
-   init2();
-}

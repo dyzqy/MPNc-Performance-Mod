@@ -1,2 +1,0 @@
-nextFrame();
-onEnterFrame = null;

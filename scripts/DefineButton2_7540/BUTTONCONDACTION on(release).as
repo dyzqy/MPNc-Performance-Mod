@@ -1,3 +1,0 @@
-on(release){
-   pressQuality("LOW");
-}

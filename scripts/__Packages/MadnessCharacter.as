@@ -339,8 +339,7 @@ class MadnessCharacter extends MovieClip
       else if(!MadnessTransition.transitionLock && this.inputAllowed() && !this.myDataRef.standStill)
       {
          // 21/11/2026 dyzqy: Limit the AI calls, it is quite expensive... 
-         //            !TODO) Check if this doesn't epxlode anything
-         // if(PulseTimer.getActive(this.myPulseNumber,2))
+         //                   There's no need to do this!
             MadnessAI.setActions(this);
       }
       if(this._alpha < 100)

@@ -1,4 +1,0 @@
-if(_medalScrollRect)
-{
-   stop();
-}

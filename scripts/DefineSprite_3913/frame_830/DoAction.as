@@ -1,2 +1,0 @@
-_parent.play();
-stop();

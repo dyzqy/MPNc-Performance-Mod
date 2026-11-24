@@ -1,1 +1,0 @@
-_parent.grappleSmack("unarmed");

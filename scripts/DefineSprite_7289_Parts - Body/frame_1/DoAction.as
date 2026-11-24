@@ -1,4 +1,0 @@
-function createWound(inNumber)
-{
-}
-stop();
