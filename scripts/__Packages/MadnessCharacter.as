@@ -3694,7 +3694,8 @@ class MadnessCharacter extends MovieClip
       // 21/11/2026 dyzqy: From what I understand, this is used to check if a bullet has hit a target. Since there aren't small targets, this could be increased(to lower expensive hit test calculations)
       //            (TODO) Or, if I am crazy enough, I *could* technically divide the level in chuncks, and only check the hitTest if there is a Grunt(I will be using this term for "characters") in that chunck
       //                   Original: 3, 7
-      this.bulletCheckDistance = SwainMath.randomNumber(5, 9);
+      // 25/11/2026 dyzqy: Reverted to original for testing purposes and seeing performance differences
+      this.bulletCheckDistance = SwainMath.randomNumber(3, 7);
       var _loc6_ = undefined;
       var _loc22_ = undefined;
       var _loc21_ = undefined;
@@ -3743,6 +3744,7 @@ class MadnessCharacter extends MovieClip
             }
          }
          var _loc7_ = new Number();
+         // 25/11/2026 dyzqy: Else if instead of if
          if(_loc2_.myCat == "smg")
          {
             this.bulletRotation *= this.smgAimTimer;
@@ -3751,7 +3753,7 @@ class MadnessCharacter extends MovieClip
                _loc7_ += 40;
             }
          }
-         if(_loc2_.myCat == "rifle")
+         else if(_loc2_.myCat == "rifle")
          {
             if(MadnessDataFile.havePerk("perkRifleAccuracy",this.myDataRef) && this.mySpeedRight == 0 && this.mySpeedDown == 0)
             {
@@ -3766,6 +3768,7 @@ class MadnessCharacter extends MovieClip
                _loc7_ += 30;
             }
          }
+         // 25/11/2026 dyzqy: TODO: Turn the obj into a variable that you can freely edit when needed
          var _loc3_ = new Object();
          if(_loc2_.melee || this.myDataRef.myWeapons[this.myWeapon].melee)
          {
@@ -3840,6 +3843,7 @@ class MadnessCharacter extends MovieClip
             this.advanceX = SwainMath.get_position(this.targetX,this.targetY,this.bulletRotation + SwainMath.calculate_rotation(this.targetX,this.targetY,this.myAimX,this.myAimY),this.bulletCheckDistance,"x") - this.targetX;
             this.advanceY = SwainMath.get_position(this.targetX,this.targetY,this.bulletRotation + SwainMath.calculate_rotation(this.targetX,this.targetY,this.myAimX,this.myAimY),this.bulletCheckDistance,"y") - this.targetY;
          }
+         // 25711/2026 dyzqy: TODO: Why are we even looping bruh :sob:
          var _loc17_ = 0;
          while(_loc17_ < 5)
          {
@@ -3850,6 +3854,33 @@ class MadnessCharacter extends MovieClip
          _loc6_ = false;
          var _loc19_ = 75;
          var _loc5_ = undefined;
+         
+         // 25/11/2026 dyzqy: Check for the available characters beforehand.
+         var candidates = []; 
+         var i = 0;
+         while(i < MadnessCharacter.allRosters.length)
+         {
+            var roster = MadnessCharacter.allRosters[i];
+            if(roster.teamFaction != this.myFaction)
+            {
+               var members = roster.myActiveMembers;
+               var j = 0;
+               while(j < members.length)
+               {
+                  var entity = members[j].mySprite;
+                  // 25/11/2026 dyzqy: Removed faction check(we are already in different faction?)
+                  if(entity._x != undefined && !entity.amDodging && !entity.deadMan && entity.myStatus != "recover" && entity.myStatus != "knockback"&& (entity.amPlayer || this.aimTimer == -1) && entity.myStatus.substr(0, 3) != "use")
+                  {
+                     if (!isMelee || this.inMeleeRange()) 
+                     {
+                        candidates.push(entity);
+                     }
+                  }
+               }
+            }
+            i++;
+         }
+
          while(!_loc6_ && this.targetX < this._x + _loc22_ && this.targetX > this._x - _loc22_ && this.targetY < this._y + _loc21_ && this.targetY > - _loc21_)
          {
             if(this._parent.bulletWallHit(this.targetX,this.targetY + _loc19_ + SwainMath.randomNumber(-5,5)) && SwainMath.randomNumber(0,_loc2_.mySpread / 2) == 0)
