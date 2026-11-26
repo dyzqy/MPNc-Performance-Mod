@@ -3868,14 +3868,21 @@ class MadnessCharacter extends MovieClip
                while(j < members.length)
                {
                   var entity = members[j].mySprite;
-                  // 25/11/2026 dyzqy: Removed faction check(we are already in different faction?)
-                  if(entity._x != undefined && !entity.amDodging && !entity.deadMan && entity.myStatus != "recover" && entity.myStatus != "knockback"&& (entity.amPlayer || this.aimTimer == -1) && entity.myStatus.substr(0, 3) != "use")
+                  // 26/11/2026 dyzqy: TODO: Check if this can be optimized further.
+                  if(entity.myFaction != this.myFaction && entity._x != undefined && !entity.amDodging && entity.myStatus != "recover" && (entity.amPlayer || this.aimTimer == -1))
                   {
-                     if (!isMelee || this.inMeleeRange()) 
+                     if(this._x < entity._x && this.myAimX >= this._x || this._x > entity._x && this.myAimX <= this._x)
                      {
-                        candidates.push(entity);
+                        if(!_loc2_.melee || _loc2_.melee && this.inMeleeRange(entity))
+                        {
+                           if(!entity.deadMan && entity.myStatus.substr(0,3) != "use" && entity.myStatus != "knockback")
+                           {
+                              candidates.push(entity);
+                           }
+                        }
                      }
                   }
+                  j++;
                }
             }
             i++;
@@ -3894,6 +3901,7 @@ class MadnessCharacter extends MovieClip
                   _loc14_ = 0;
                   while(_loc14_ < MadnessDoors.allDoors.length)
                   {
+                     // 26/11/2026 dyzqy: TODO: Improve the performance on this
                      if(MadnessDoors.allDoors[_loc14_].noBullet.hitTest(_loc3_.x,_loc3_.y,true))
                      {
                         break;
@@ -3965,255 +3973,243 @@ class MadnessCharacter extends MovieClip
                }
             }
             var _loc12_ = false;
-            _loc11_ = 0;
-            while(_loc11_ < MadnessCharacter.allRosters.length)
+            // _loc11_ = 0;
+            
+            _loc13_ = 0;
+            while(_loc13_ < candidates.length)
             {
-               // TODO: Figure out how to approprietly name this thing
-               var thing = MadnessCharacter.allRosters[_loc11_];
-               if(thing.teamFaction != this.myFaction)
+               this.targetEnemy = candidates[_loc13_];
+               var _loc8_ = undefined;
+               _loc8_ = 0;
+               while(_loc8_ < this.targetsTac.length)
                {
-                  _loc13_ = 0;
-                  while(_loc13_ < thing.myActiveMembers.length)
+                  if(this.targetsTac[_loc8_] == this.targetEnemy)
                   {
-                     this.targetEnemy = thing.myActiveMembers[_loc13_].mySprite;
-                     if(this.targetEnemy.myFaction != this.myFaction && this.targetEnemy._x != undefined && !this.targetEnemy.amDodging && this.targetEnemy.myStatus != "recover" && (this.targetEnemy.amPlayer || this.aimTimer == -1))
+                     break;
+                  }
+                  _loc8_ = _loc8_ + 1;
+               }
+               if(_loc8_ == this.targetsTac.length)
+               {
+                  if(this._x < this.targetEnemy._x && this.myAimX >= this._x || this._x > this.targetEnemy._x && this.myAimX <= this._x)
+                  {
+                     if(!_loc2_.melee || _loc2_.melee && this.inMeleeRange(this.targetEnemy))
                      {
-                        var _loc8_ = undefined;
-                        _loc8_ = 0;
-                        while(_loc8_ < this.targetsTac.length)
+                        if(SwainMath.randomNumber(1,this.targetEnemy.myDataRef.myScale) == 1)
                         {
-                           if(this.targetsTac[_loc8_] == this.targetEnemy)
+                           // 22/11/2026 dyzqy: Fixed width calculations
+                           if(this.targetX < this.targetEnemy._x + this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100) * 0.5 && this.targetX > this.targetEnemy._x - this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100) * 0.5)
                            {
-                              break;
-                           }
-                           _loc8_ = _loc8_ + 1;
-                        }
-                        if(_loc8_ == this.targetsTac.length)
-                        {
-                           if(this._x < this.targetEnemy._x && this.myAimX >= this._x || this._x > this.targetEnemy._x && this.myAimX <= this._x)
-                           {
-                              if(!_loc2_.melee || _loc2_.melee && this.inMeleeRange(this.targetEnemy))
+                              if(this.targetY < this.targetEnemy._y && this.targetY > this.targetEnemy._y - this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100))
                               {
-                                 if(SwainMath.randomNumber(1,this.targetEnemy.myDataRef.myScale) == 1)
+                                 _loc12_ = false;
+                                 _loc3_.x = this.targetX;
+                                 _loc3_.y = this.targetY;
+                                 this._parent.localToGlobal(_loc3_);
+                                 // 22/11/2026 dyzqy: Check the bounding box BEFORE checking the actual bounds
+                                 // 27/11/2026 dyzqy: Removed the fix, TODO: implement a better limiter
+                                 if((this.targetEnemy.headDamage <= 3 || this.targetEnemy.myDataRef.bulletEater) && (_loc12_ = this.targetEnemy.mySprite.myHead.myHit.hitTest(_loc3_.x,_loc3_.y,true)) || this.targetEnemy.mySprite.myBody.myHit.hitTest(_loc3_.x,_loc3_.y,true))
                                  {
-                                    if(!this.targetEnemy.deadMan && this.targetEnemy.myStatus.substr(0,3) != "use" && this.targetEnemy.myStatus != "knockback")
+                                    // 26/11/2026 dyzqy: Commented out! It isn't used at all :thinking:
+                                    // var _loc18_ = SwainMath.randomNumber(0,99999);
+                                    if(_loc2_.melee)
                                     {
-                                       // 22/11/2026 dyzqy: Fixed width calculations
-                                       if(this.targetX < this.targetEnemy._x + this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100) * 0.5 && this.targetX > this.targetEnemy._x - this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100) * 0.5)
+                                       this.intendedX = this.targetEnemy._x;
+                                       this.intendedY = this.targetEnemy._y;
+                                       this.targetApproach = true;
+                                       if(this.isFacingRight)
                                        {
-                                          if(this.targetY < this.targetEnemy._y && this.targetY > this.targetEnemy._y - this.targetEnemy.myHeight * (this.targetEnemy._yscale / 100))
+                                          this.intendedX -= _loc2_.myRange * this.myDataRef.myScale - 40;
+                                       }
+                                       else
+                                       {
+                                          this.intendedX += _loc2_.myRange * this.myDataRef.myScale - 40;
+                                       }
+                                    }
+                                    _loc5_ = 2;
+                                    if(MadnessDataFile.havePerk("perkPistolEffectiveness",this.myDataRef) && (_loc2_.myCat == "pistol" || _loc2_.myCat == "revolver") || MadnessDataFile.havePerk("perkRifleEffectiveness",this.myDataRef) && _loc2_.myCat == "rifle")
+                                    {
+                                       _loc5_ -= 1;
+                                    }
+                                    if(_loc2_.upgradeLaser)
+                                    {
+                                       _loc5_ -= 1;
+                                    }
+                                    if(_loc2_.upgradeSight)
+                                    {
+                                       _loc5_ -= 1;
+                                    }
+                                    if(_loc9_ > _loc2_.myRange * this.myDataRef.myScale + this.myDataRef.modRange + _loc7_)
+                                    {
+                                       _loc5_ += Math.ceil((_loc9_ - (_loc2_.myRange * this.myDataRef.myScale + this.myDataRef.modRange + _loc7_)) / 45);
+                                    }
+                                    if(_loc5_ < 0)
+                                    {
+                                       _loc5_ = 0;
+                                    }
+                                    if(!this.myDataRef.noRange && this.aimTimer == -1 && !_loc2_.melee && _loc9_ > _loc2_.myRange * this.myDataRef.myScale + this.myDataRef.modRange + _loc7_ && SwainMath.randomNumber(0,_loc5_) > 1)
+                                    {
+                                       this.targetsTac.push(this.targetEnemy);
+                                    }
+                                    else
+                                    {
+                                       if(!this.myDataRef.amZombie && !this.myDataRef.amAbom && this.amBlocking(this.targetEnemy,this,_loc2_) && !((MadnessDataFile.havePerk("perkBlockBreak",this.myDataRef) && MadnessGameSelect.gameMode != "story" || this.myDataRef.autoHit) && _loc2_.melee))
+                                       {
+                                          if(MadnessDataFile.havePerk("perkBlock2",this.targetEnemy.myDataRef) && !_loc2_.melee)
                                           {
-                                             _loc12_ = false;
-                                             _loc3_.x = this.targetX;
-                                             _loc3_.y = this.targetY;
-                                             this._parent.localToGlobal(_loc3_);
-                                             // 22/11/2026 dyzqy: Check the bounding box BEFORE checking the actual bounds
-                                             if(this.targetEnemy.mySprite.hitTest(_loc3_.x,_loc3_.y,false) && ((this.targetEnemy.headDamage <= 3 || this.targetEnemy.myDataRef.bulletEater) && (_loc12_ = this.targetEnemy.mySprite.myHead.myHit.hitTest(_loc3_.x,_loc3_.y,true)) || this.targetEnemy.mySprite.myBody.myHit.hitTest(_loc3_.x,_loc3_.y,true)))
+                                             this.targetEnemy.checkAttackHit("","",_loc2_);
+                                             this.targetEnemy.deflectBullet(this,this.targetX,this.targetY,_loc2_);
+                                             this._parent.makeBullet(this.targetEnemy,this.targetEnemy.myBlasts[0].myRot,this.targetEnemy.myBlasts[0].myLength,this.targetEnemy.myBlasts[0].myX,this.targetEnemy.myBlasts[0].myY,this.targetX,this.targetY,_loc2_.myTracer);
+                                          }
+                                          else
+                                          {
+                                             this.targetEnemy.blockBullet(this,this.targetX,this.targetY,_loc2_);
+                                          }
+                                          if(MadnessDataFile.havePerk("perkMeleeDisarm",this.targetEnemy.myDataRef) && this.targetEnemy.actionTimer < 10 && _loc2_.melee && _loc2_.myType != "unarmed")
+                                          {
+                                             this.myStatus = "stun_parry" + SwainMath.randomNumber(1,2);
+                                             this.mySprite.gotoAndStop(this.myStatus);
+                                             this.disarmGun();
+                                          }
+                                          this.targetEnemy.blockReset();
+                                          this.targetEnemy.hitTactics(_loc2_,this,true,false,_loc9_ <= _loc2_.myRange * this.myDataRef.myScale + this.myDataRef.modRange + _loc7_);
+                                          this.damageMelee(_loc2_);
+                                          this.targetEnemy.damageMelee(this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon]);
+                                          if(this.aimTimer == 0 && this.targetEnemy.myHealth > 0)
+                                          {
+                                             this.targetEnemy.myStatus = "stun_parry" + SwainMath.randomNumber(1,2);
+                                             if(this.myTactics <= 0)
                                              {
-                                                var _loc18_ = SwainMath.randomNumber(0,99999);
-                                                if(_loc2_.melee)
-                                                {
-                                                   this.intendedX = this.targetEnemy._x;
-                                                   this.intendedY = this.targetEnemy._y;
-                                                   this.targetApproach = true;
-                                                   if(this.isFacingRight)
-                                                   {
-                                                      this.intendedX -= _loc2_.myRange * this.myDataRef.myScale - 40;
-                                                   }
-                                                   else
-                                                   {
-                                                      this.intendedX += _loc2_.myRange * this.myDataRef.myScale - 40;
-                                                   }
-                                                }
-                                                _loc5_ = 2;
-                                                if(MadnessDataFile.havePerk("perkPistolEffectiveness",this.myDataRef) && (_loc2_.myCat == "pistol" || _loc2_.myCat == "revolver") || MadnessDataFile.havePerk("perkRifleEffectiveness",this.myDataRef) && _loc2_.myCat == "rifle")
-                                                {
-                                                   _loc5_ -= 1;
-                                                }
-                                                if(_loc2_.upgradeLaser)
-                                                {
-                                                   _loc5_ -= 1;
-                                                }
-                                                if(_loc2_.upgradeSight)
-                                                {
-                                                   _loc5_ -= 1;
-                                                }
-                                                if(_loc9_ > _loc2_.myRange * this.myDataRef.myScale + this.myDataRef.modRange + _loc7_)
-                                                {
-                                                   _loc5_ += Math.ceil((_loc9_ - (_loc2_.myRange * this.myDataRef.myScale + this.myDataRef.modRange + _loc7_)) / 45);
-                                                }
-                                                if(_loc5_ < 0)
-                                                {
-                                                   _loc5_ = 0;
-                                                }
-                                                if(!this.myDataRef.noRange && this.aimTimer == -1 && !_loc2_.melee && _loc9_ > _loc2_.myRange * this.myDataRef.myScale + this.myDataRef.modRange + _loc7_ && SwainMath.randomNumber(0,_loc5_) > 1)
-                                                {
-                                                   this.targetsTac.push(this.targetEnemy);
-                                                }
-                                                else
-                                                {
-                                                   if(!this.myDataRef.amZombie && !this.myDataRef.amAbom && this.amBlocking(this.targetEnemy,this,_loc2_) && !((MadnessDataFile.havePerk("perkBlockBreak",this.myDataRef) && MadnessGameSelect.gameMode != "story" || this.myDataRef.autoHit) && _loc2_.melee))
-                                                   {
-                                                      if(MadnessDataFile.havePerk("perkBlock2",this.targetEnemy.myDataRef) && !_loc2_.melee)
-                                                      {
-                                                         this.targetEnemy.checkAttackHit("","",_loc2_);
-                                                         this.targetEnemy.deflectBullet(this,this.targetX,this.targetY,_loc2_);
-                                                         this._parent.makeBullet(this.targetEnemy,this.targetEnemy.myBlasts[0].myRot,this.targetEnemy.myBlasts[0].myLength,this.targetEnemy.myBlasts[0].myX,this.targetEnemy.myBlasts[0].myY,this.targetX,this.targetY,_loc2_.myTracer);
-                                                      }
-                                                      else
-                                                      {
-                                                         this.targetEnemy.blockBullet(this,this.targetX,this.targetY,_loc2_);
-                                                      }
-                                                      if(MadnessDataFile.havePerk("perkMeleeDisarm",this.targetEnemy.myDataRef) && this.targetEnemy.actionTimer < 10 && _loc2_.melee && _loc2_.myType != "unarmed")
-                                                      {
-                                                         this.myStatus = "stun_parry" + SwainMath.randomNumber(1,2);
-                                                         this.mySprite.gotoAndStop(this.myStatus);
-                                                         this.disarmGun();
-                                                      }
-                                                      this.targetEnemy.blockReset();
-                                                      this.targetEnemy.hitTactics(_loc2_,this,true,false,_loc9_ <= _loc2_.myRange * this.myDataRef.myScale + this.myDataRef.modRange + _loc7_);
-                                                      this.damageMelee(_loc2_);
-                                                      this.targetEnemy.damageMelee(this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon]);
-                                                      if(this.aimTimer == 0 && this.targetEnemy.myHealth > 0)
-                                                      {
-                                                         this.targetEnemy.myStatus = "stun_parry" + SwainMath.randomNumber(1,2);
-                                                         if(this.myTactics <= 0)
-                                                         {
-                                                            this.targetEnemy.disarmGun();
-                                                         }
-                                                      }
-                                                      if(this.targetEnemy.myTactics == 0)
-                                                      {
-                                                         this.targetEnemy.myStatus = "stun_parry" + SwainMath.randomNumber(1,2);
-                                                      }
-                                                      if(_loc2_.melee && _loc2_.myDamageType != "punch")
-                                                      {
-                                                         this.playSound("blockmelee");
-                                                      }
-                                                      else if(_loc2_.myDamageType == "punch")
-                                                      {
-                                                         this.playSound("blunt");
-                                                      }
-                                                      else
-                                                      {
-                                                         this.playSound("ricochet");
-                                                      }
-                                                      _loc6_ = true;
-                                                      break;
-                                                   }
-                                                   if(this.myDataRef.weaponStealer && (this.targetEnemy.myStatus != "melee" && this.targetEnemy.rofTimer < 15 || this.targetEnemy.myStatus == "restrained" && SwainMath.randomNumber(0,1) == 0) && this.myDataRef.myWeapons[this.myWeapon] == undefined && this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon] != undefined && (this.targetEnemy.myStatus == "restrained" || this.targetEnemy._x > this._x && (this.targetEnemy.isFacingRight && this.targetEnemy.facingOpposite || !this.targetEnemy.isFacingRight && !this.targetEnemy.facingOpposite) || this.targetEnemy._x < this._x && (!this.targetEnemy.isFacingRight && this.targetEnemy.facingOpposite || this.targetEnemy.isFacingRight && !this.targetEnemy.facingOpposite)) && this.myDataRef.myScale == this.targetEnemy.myDataRef.myScale)
-                                                   {
-                                                      this.playSound("swish");
-                                                      if(this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon].melee)
-                                                      {
-                                                         this.playSound("swapmelee");
-                                                      }
-                                                      else if(this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon] != undefined)
-                                                      {
-                                                         this.playSound("swapgun");
-                                                      }
-                                                      this.myDataRef.myWeapons[this.myWeapon] = this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon];
-                                                      this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon] = undefined;
-                                                      if(this.targetEnemy.myStatus != "restrained")
-                                                      {
-                                                         this.targetEnemy.myStatus = "stun_parry" + SwainMath.randomNumber(1,2);
-                                                      }
-                                                      _loc6_ = true;
-                                                      break;
-                                                   }
-                                                   if(this.canGrapple(this.targetEnemy))
-                                                   {
-                                                      this.myStatus = "grapple";
-                                                      this.targetEnemy.myStatus = "restrained";
-                                                      if(this.myDataRef.amZombie)
-                                                      {
-                                                         this.mySubStatus = "_zombie";
-                                                      }
-                                                      if(this.myDataRef.amAbom)
-                                                      {
-                                                         this.mySubStatus = "_abom";
-                                                      }
-                                                      else
-                                                      {
-                                                         this.mySubStatus = "_zombie";
-                                                      }
-                                                      this.targetEnemy.mySubStatus = this.mySubStatus;
-                                                      if(this.targetEnemy.amPlayer)
-                                                      {
-                                                         this.aimFlash();
-                                                      }
-                                                      this.targetEnemy.grappleTimer = this.targetEnemy.grappleTimerMax / 10 * this.myDataRef.myLevel;
-                                                      this.playSound("land");
-                                                      this.playSound("swish");
-                                                      this.myAttackTarget = this.targetEnemy;
-                                                      this.intendedX = this.targetEnemy._x;
-                                                      this.intendedY = this.targetEnemy._y + 8;
-                                                      this.intendedY += SwainMath.randomNumber(-50,50) * 0.1;
-                                                      if(this.isFacingRight)
-                                                      {
-                                                         this.intendedX -= (_loc2_.myRange * this.myDataRef.myScale - 40) * (SwainMath.randomNumber(50,100) * 0.01);
-                                                      }
-                                                      else
-                                                      {
-                                                         this.intendedX += (_loc2_.myRange * this.myDataRef.myScale - 40) * (SwainMath.randomNumber(50,100) * 0.01);
-                                                      }
-                                                      _loc6_ = true;
-                                                      break;
-                                                   }
-                                                   if(!(this.targetEnemy.myStatus != "restrained" && this.aimTimer == -1 && this.targetEnemy.myTactics > 0 && (!this.myDataRef.autoHit || !_loc2_.melee) && !this.myDataRef.amSurprised))
-                                                   {
-                                                      var _loc15_ = this.targetEnemy.myHealth > 0;
-                                                      MadnessCharacter.adjustSprite(this.targetEnemy);
-                                                      this.targetEnemy.checkDamage(_loc2_,this,this.targetX,this.targetY,_loc9_ <= _loc2_.myRange * this.myDataRef.myScale + this.myDataRef.modRange + _loc7_ || _loc2_.melee || this.myDataRef.autoHit,_loc12_);
-                                                      if(_loc15_ && this.targetEnemy.myHealth <= 0)
-                                                      {
-                                                         MadnessGameSelect.appropriateXP(this.myDataRef,this.targetEnemy.myDataRef,"attack");
-                                                      }
-                                                      this.targetsHit.push(this.targetEnemy);
-                                                      this.damageMelee(_loc2_);
-                                                      var _loc10_ = 22;
-                                                      if((MadnessDataFile.havePerk("perkStunDash2",this.myDataRef) || this.myDataRef.knockdownDash) && this.myStatus.substr(0,10) == "melee_dash" || this.myDataRef.myScale > this.targetEnemy.myDataRef.myScale)
-                                                      {
-                                                         _loc10_ = 0;
-                                                      }
-                                                      else if(MadnessDataFile.havePerk("perkKnockdown2",this.myDataRef) && this.myStatus.substr(0,10) != "melee_dash")
-                                                      {
-                                                         _loc10_ = 2;
-                                                      }
-                                                      else if(MadnessDataFile.havePerk("perkKnockdown1",this.myDataRef) && this.myStatus.substr(0,10) != "melee_dash")
-                                                      {
-                                                         _loc10_ = 6;
-                                                      }
-                                                      if(this.aimTimer == 0 || _loc2_.melee && !this.targetEnemy.noDamage && ((_loc2_.myDamageType == "blunt" || _loc2_.myDamageType == "punch") && SwainMath.randomNumber(0,_loc10_) == 0 && this.myDataRef.myScale >= this.targetEnemy.myDataRef.myScale))
-                                                      {
-                                                         this.targetEnemy.applyKnockback(this,this.myDataRef.statSTR / 2,false);
-                                                      }
-                                                      _loc6_ = true;
-                                                      break;
-                                                   }
-                                                   this.targetEnemy.hitTactics(_loc2_,this,false,false,_loc9_ <= _loc2_.myRange * this.myDataRef.myScale + this.myDataRef.modRange + _loc7_);
-                                                   this.targetsTac.push(this.targetEnemy);
-                                                }
+                                                this.targetEnemy.disarmGun();
                                              }
                                           }
+                                          if(this.targetEnemy.myTactics == 0)
+                                          {
+                                             this.targetEnemy.myStatus = "stun_parry" + SwainMath.randomNumber(1,2);
+                                          }
+                                          if(_loc2_.melee && _loc2_.myDamageType != "punch")
+                                          {
+                                             this.playSound("blockmelee");
+                                          }
+                                          else if(_loc2_.myDamageType == "punch")
+                                          {
+                                             this.playSound("blunt");
+                                          }
+                                          else
+                                          {
+                                             this.playSound("ricochet");
+                                          }
+                                          _loc6_ = true;
+                                          break;
                                        }
+                                       if(this.myDataRef.weaponStealer && (this.targetEnemy.myStatus != "melee" && this.targetEnemy.rofTimer < 15 || this.targetEnemy.myStatus == "restrained" && SwainMath.randomNumber(0,1) == 0) && this.myDataRef.myWeapons[this.myWeapon] == undefined && this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon] != undefined && (this.targetEnemy.myStatus == "restrained" || this.targetEnemy._x > this._x && (this.targetEnemy.isFacingRight && this.targetEnemy.facingOpposite || !this.targetEnemy.isFacingRight && !this.targetEnemy.facingOpposite) || this.targetEnemy._x < this._x && (!this.targetEnemy.isFacingRight && this.targetEnemy.facingOpposite || this.targetEnemy.isFacingRight && !this.targetEnemy.facingOpposite)) && this.myDataRef.myScale == this.targetEnemy.myDataRef.myScale)
+                                       {
+                                          this.playSound("swish");
+                                          if(this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon].melee)
+                                          {
+                                             this.playSound("swapmelee");
+                                          }
+                                          else if(this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon] != undefined)
+                                          {
+                                             this.playSound("swapgun");
+                                          }
+                                          this.myDataRef.myWeapons[this.myWeapon] = this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon];
+                                          this.targetEnemy.myDataRef.myWeapons[this.targetEnemy.myWeapon] = undefined;
+                                          if(this.targetEnemy.myStatus != "restrained")
+                                          {
+                                             this.targetEnemy.myStatus = "stun_parry" + SwainMath.randomNumber(1,2);
+                                          }
+                                          _loc6_ = true;
+                                          break;
+                                       }
+                                       if(this.canGrapple(this.targetEnemy))
+                                       {
+                                          this.myStatus = "grapple";
+                                          this.targetEnemy.myStatus = "restrained";
+                                          if(this.myDataRef.amZombie)
+                                          {
+                                             this.mySubStatus = "_zombie";
+                                          }
+                                          if(this.myDataRef.amAbom)
+                                          {
+                                             this.mySubStatus = "_abom";
+                                          }
+                                          else
+                                          {
+                                             this.mySubStatus = "_zombie";
+                                          }
+                                          this.targetEnemy.mySubStatus = this.mySubStatus;
+                                          if(this.targetEnemy.amPlayer)
+                                          {
+                                             this.aimFlash();
+                                          }
+                                          this.targetEnemy.grappleTimer = this.targetEnemy.grappleTimerMax / 10 * this.myDataRef.myLevel;
+                                          this.playSound("land");
+                                          this.playSound("swish");
+                                          this.myAttackTarget = this.targetEnemy;
+                                          this.intendedX = this.targetEnemy._x;
+                                          this.intendedY = this.targetEnemy._y + 8;
+                                          this.intendedY += SwainMath.randomNumber(-50,50) * 0.1;
+                                          if(this.isFacingRight)
+                                          {
+                                             this.intendedX -= (_loc2_.myRange * this.myDataRef.myScale - 40) * (SwainMath.randomNumber(50,100) * 0.01);
+                                          }
+                                          else
+                                          {
+                                             this.intendedX += (_loc2_.myRange * this.myDataRef.myScale - 40) * (SwainMath.randomNumber(50,100) * 0.01);
+                                          }
+                                          _loc6_ = true;
+                                          break;
+                                       }
+                                       if(!(this.targetEnemy.myStatus != "restrained" && this.aimTimer == -1 && this.targetEnemy.myTactics > 0 && (!this.myDataRef.autoHit || !_loc2_.melee) && !this.myDataRef.amSurprised))
+                                       {
+                                          var _loc15_ = this.targetEnemy.myHealth > 0;
+                                          MadnessCharacter.adjustSprite(this.targetEnemy);
+                                          this.targetEnemy.checkDamage(_loc2_,this,this.targetX,this.targetY,_loc9_ <= _loc2_.myRange * this.myDataRef.myScale + this.myDataRef.modRange + _loc7_ || _loc2_.melee || this.myDataRef.autoHit,_loc12_);
+                                          if(_loc15_ && this.targetEnemy.myHealth <= 0)
+                                          {
+                                             MadnessGameSelect.appropriateXP(this.myDataRef,this.targetEnemy.myDataRef,"attack");
+                                          }
+                                          this.targetsHit.push(this.targetEnemy);
+                                          this.damageMelee(_loc2_);
+                                          var _loc10_ = 22;
+                                          if((MadnessDataFile.havePerk("perkStunDash2",this.myDataRef) || this.myDataRef.knockdownDash) && this.myStatus.substr(0,10) == "melee_dash" || this.myDataRef.myScale > this.targetEnemy.myDataRef.myScale)
+                                          {
+                                             _loc10_ = 0;
+                                          }
+                                          else if(MadnessDataFile.havePerk("perkKnockdown2",this.myDataRef) && this.myStatus.substr(0,10) != "melee_dash")
+                                          {
+                                             _loc10_ = 2;
+                                          }
+                                          else if(MadnessDataFile.havePerk("perkKnockdown1",this.myDataRef) && this.myStatus.substr(0,10) != "melee_dash")
+                                          {
+                                             _loc10_ = 6;
+                                          }
+                                          if(this.aimTimer == 0 || _loc2_.melee && !this.targetEnemy.noDamage && ((_loc2_.myDamageType == "blunt" || _loc2_.myDamageType == "punch") && SwainMath.randomNumber(0,_loc10_) == 0 && this.myDataRef.myScale >= this.targetEnemy.myDataRef.myScale))
+                                          {
+                                             this.targetEnemy.applyKnockback(this,this.myDataRef.statSTR / 2,false);
+                                          }
+                                          _loc6_ = true;
+                                          break;
+                                       }
+                                       this.targetEnemy.hitTactics(_loc2_,this,false,false,_loc9_ <= _loc2_.myRange * this.myDataRef.myScale + this.myDataRef.modRange + _loc7_);
+                                       this.targetsTac.push(this.targetEnemy);
                                     }
                                  }
                               }
                            }
                         }
                      }
-                     _loc13_ = _loc13_ + 1;
                   }
-                  // trace("Has done this this many times!" + _loc13_);
                }
-               if(_loc6_)
-               {
-                  break;
-               }
-               _loc11_ = _loc11_ + 1;
+               // _loc11_ = _loc11_ + 1;
+               _loc13_ = _loc13_ + 1;
+               // trace("Has done this this many times!" + _loc13_);
             }
-            // trace("FATHER OF ABOVE ^ Has done this this many times!" + _loc11_);
+            if(_loc6_)
+            {
+               break;
+            }
             if(!_loc6_)
             {
                this.targetX += this.advanceX;
