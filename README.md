@@ -1,13 +1,17 @@
 # What is this?
-This is a mod for the flash game Madness Project Nexus, specifically made to improve the FPS and let players, even on lower devices, enjoy such a masterpiece of its time. While also allowing new players, on newer machines, play arena levels with many more units, while getting much less of the annoying FPS drops. 
+This is a mod for the flash game **[Madness Project Nexus Classic](www.newgrounds.com/portal/view/592473)**. The goal for this mod is to improve the performance & FPS to let players, even on lower devices, enjoy such a masterpiece. While also enabling for more chaotic and smooth gameplay even when there are tens of enemies on the same screen.
 
-I hope this project is one day enjoyed by all people!
+This mod also plans to fix original game bugs, which in the code will be indicated in comments as `OG BUG`. These fixes, however, will be held off until most performance improvements are implemented. Perhaps even 2 different versions will be available, one with bug fixes and one without.
 
-## How do I play?
-So there are 2 main ways to play with an SWF. Install the original **Flash Player**(which isn't really a security-first approach), or use Ruffle(which is a terrible choice because the performance improvements applied in this project do not improve your FPS at all).
+## How to play?
+There are 2 main ways to play with an SWF. 
+- **Standalone Adobe Flash Player 32** *(Recommended)*, allows you to experience the original game as intended, with all of the performance improvements having full effect.
+- **Ruffle** *(Not Recommended)*, runs safely in modern browsers without any installs needed, **but** not all the optimizations in this mod will not improve your FPS on Ruffle(version 0.8.0).
 
-You can install it right here: [click here](https://github.com/dyzqy/MPNc-Performance-Mod/raw/refs/heads/main/versions/Madness_Project_Nexus.swf)
+Download **[Madness_Project_Nexus.swf](https://github.com/dyzqy/MPNc-Performance-Mod/raw/refs/heads/main/versions/Madness_Project_Nexus.swf)**
+> Note: This version might include game breaking bugs, unfinished performance improvements, or crashes. You are HIGHLY advised to seek a download through the [Releases](https://github.com/dyzqy/MPNc-Performance-Mod/releases) page. 
 
+<!--
 ## Known bugs
 - Hands will flicker random skins(on certain weapons or actions)!
 - Obstacles don't really obsticl-ate your passing
@@ -15,47 +19,42 @@ You can install it right here: [click here](https://github.com/dyzqy/MPNc-Perfor
 - Enemies passing through level boundaries
 - Clips of guns ABOVE the gun? (In the original game)
 - AI likes to cling to walls?
-- Enemies facing right will have a default body skin
+- Enemies facing right will have a default body skin -->
 
-## What is to optimize?
-So there is good news and bad news.
+## The Difficulties
+Before I started working on this project earnestly and only did changes here and there, I thought lag came from only 2 places: adjustSprite() & checkAttackHit(). And boy did I hope I was right. 
 
-The good news? There are 2 functions that cause **all of the lag** inside the whole game.
+Finding the reason for the lag inside the game right at the start saves you alot of headache, but after day and day of work a realization became apparant... These 2 functions do not contribute to all of the FPS drops in the game. But I still had hope in Adobe Scout. So I asked my friend to turn it on and test it, and then I realized that because the game was written in AS2, it shows no method calls that are the reason for the lag.
 
-The bad news? Those 2 functions are ginormous. One is 700+ lines long, the other is 500+ lines.
+And so this is where the real hardship of the project came to be. What is *really* difficult about this project isn't programming the fixes, those can be done with time. It is finding where lag originates from. *That* is what causes the most headache. Finding *where* exactly that pesky code is throwing you off is what separates you from having the day of your life and remaining homeless for the rest of your life. As you already know, 99% of gamblers quit before they win big. 
 
-(There are some other functions that contribute to the lag but NOT AS MUCH AS THESE 2)
+As time goes on, I will be able to identify more and more bottlenecks, but that isn't something that can be done overnight. The only supposed saving grace(s), Adobe Scout & Tracy, both do not offer following method calls for AS2, meaning everything needs to be done manually, from searching to fixing the oversights. 
 
-The main contributors to lag are as follows:
-1. gotoAndStop()/nextFrame()
-2. hitTest() 
-3. Nested loops(2700+ checks when the function is ran!)
-4. Garbage creaton(substr, new Object, localToGlobal, new Point, etc.)
+AI, even if used as a tool, cannot handle such magnitude of a project either, and fails at the simplest instructions given. Either at finding, or implementing. Which means this mountain of work needs to be manually, with only the slightest help from Artificial Intelligence(not so intelligent however).
 
-Trying to separate and implement the performance improvements for these 2 functions isn't an easy task. It needs to be done gradually, fix by fix. Thankfully I already started doing some changes, but these changes, with me not knowing the whole scope of how everything works, eventually lead to bugs, so I would be thankful if you were to report them to me on discord. My username is **dyzqy**
-
-## Current Progress
-- adjustSprite(), causes lag the more units are present in the room. Approximately 75% of its performance improvements are done
-- checkAttackHit(), FPS drops when a unit attacks using any type of weapon. About 2% of its performance improvements are done.
-- ???, FPS drops when getting near units. 0% performance improvements have been done.
-- ???, FPS drops when a unit desides to switch weapons. 0% performance improvements have been done.
+## Current Progress(estimates)
+- adjustSprite(), approximately 40% of its performance improvements are done
+  - causes lag the more units are present in the room.
+  - getting near enemy units causes lag spikes(might be related to line below)
+  - whenever an enemy unit uses a melee attack, a lag spike is followed.
+- checkAttackHit(), FPS drops when a unit attacks using any type of weapon. About 10% of its performance improvements are done.
+- ???, FPS drops when a unit decides to switch weapons. 0% performance improvements have been done.
+  - NOT caused by adjustSprite()
 - ???, FPS drops when entering a new or old room. 0% performance improvements have been done.
 - ???, getting targeted(with the line of death or whatever it is called) causes huge lag spike in only some cases.
 
 ## Credits
-- Main Programmer, Project Lead, Idea: dyzqy
-- Helped with design and ideas: RinasSam
-- Thanks to the Bros, they know who they are :x
-- Testers: AnakinLuke0, E1820
-
-Special thanks to RinasSam, for creating a way to program entirely on Visual Studio Code!
-Special thanks to JPEXS for creating FFDEC, the tool used to modify the game!
-Special thanks to the creators of the original MPNc! A beautiful game!
-And finally, many thanks to whoever helped in the creation of this project!
+- **Main Programmer, Project Lead & Idea**: dyzqy
+- **Profiling & Miscellaneous Help**: RinasSam
+- **Testers**: AnakinLuke0, E1820
+- **Special thanks to**: 
+  - **RinasSam**, for creating a workflow to program entirely on Visual Studio Code!
+  - **JPEXS** for creating FFDEC
+  - **Krinkels & Swain**, for creating the original *Madness: Project Nexus (Classic)*
 
 ## License
 *Madness: Project Nexus (Classic)* and all original assets, art, audio, and base game code are the property of **Krinkels** (Matt Jolly) and **Swain** (Michael Swain). This is an unofficial, non-commercial fan modification and is not affiliated with or endorsed by the original creators. 
 
 If you are a rights holder and would like this repository to be removed, please contact me on Discord (**dyzqy**) or open a GitHub issue.
 
-All original code changes, patches, and documentation, and ONLY what was mentioned before, created for this performance mod are licensed under the [Apatche 2.0 License](LICENSE).
+All original code changes, patches, and documentation created for this performance mod are licensed under the [Apatche 2.0 License](LICENSE).
