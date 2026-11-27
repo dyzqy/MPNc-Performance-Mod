@@ -4487,6 +4487,9 @@ class MadnessCharacter extends MovieClip
    }
    static function makeSpritePart(inChar, inContainer, inID)
    {
+      // 27/11/2026 dyzqy: TODO: Reordering things and limiting substr calls as much as possible. 
+      //                   Substr is a really expensive operation, simply because of the garbage it causes.
+      //                   Also unnecessary removal and attaching of movieclips 
       if(inID == "remove2")
       {
          inContainer.myPart.removeMovieClip();
@@ -4600,6 +4603,7 @@ class MadnessCharacter extends MovieClip
    var lastBodyType:String;
    static function adjustSprite(inChar)
    {
+      // 27/11/2026 dyzqy: TODO: Guarding unnecessary creation of objects if it isn't needed.
       MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.myHead,"Parts - Head");
       MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.myBody,"Parts - Body");
       
@@ -4768,10 +4772,15 @@ class MadnessCharacter extends MovieClip
          bodyCache.myBackup.myGun = inChar.myDataRef.myWeapons[_loc9_];
          bodyCache.myBackup._visible = true;
       }
-      MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.handNone_back,"character_hand");
-      MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.handNone_front,"character_hand");
-      MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.handShoot_back,"character_hand");
-      MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.handShoot_front,"character_hand");
+
+      // 27/11/2026 dyzqy: Guarding unnecessary creation of objects if it isn't needed.
+      if(handNoneBackCache.myHandSprite == undefined)
+      {
+         MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.handNone_back,"character_hand");
+         MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.handNone_front,"character_hand");
+         MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.handShoot_back,"character_hand");
+         MadnessCharacter.makeSpritePart(inChar,inChar.mySprite.handShoot_front,"character_hand");
+      }
 
       // 21/11/2026 dyzqy: Caching sprites...
       var handNoneFrontCache = inChar.mySprite.handNone_front;
@@ -4895,7 +4904,7 @@ class MadnessCharacter extends MovieClip
       //                  Limit it, contain it, etc.
       //           (TODO) Fix flashing of one of the hands being bugged for the player when going through doors(?) and holding rifles(?)
       // 24/11/2026 dyzqy: Removed the if statement, will come back to improve this later! 
-      // 24/11/2026 dyzqy: TODO:
+      // 24/11/2026 dyzqy: TODO: Implement the gotoAndStop limiter!
       handNoneBackCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
       handNoneFrontCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);
       handShootBackCache.myHandSprite.myHand.gotoAndStop(inChar.myDataRef.handType);

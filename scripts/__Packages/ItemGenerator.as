@@ -2894,24 +2894,32 @@ class ItemGenerator
    }
    static function setItemSprite(inSprite, inWeapon)
    {
+      // 27/11/2026 dyzqy: Many of the inSprites(coming from adjustSprite()) are usually undefined, which means skipping them yields some neglishable but good to have performance!
+      if(inSprite == undefined) return;
       if(inWeapon.myCat == "melee")
       {
-         inSprite.stop();
+         // 27/11/2026 dyzqy: It is better to get the desired frame before setting it. And checking if setting it is even needed!
+         var targetFrame:Number = 1;
          if(inWeapon.myHealth <= inWeapon.myHealthMax * 0.12)
          {
-            inSprite.gotoAndStop(4);
+            targetFrame = 4;
          }
          else if(inWeapon.myHealth <= inWeapon.myHealthMax * 0.3)
          {
-            inSprite.gotoAndStop(3);
+            targetFrame = 3;
          }
          else if(inWeapon.myHealth <= inWeapon.myHealthMax * 0.75)
          {
-            inSprite.gotoAndStop(2);
+            targetFrame = 2;
+         }
+
+         if(inSprite._currentframe != targetFrame)
+         {
+            inSprite.gotoAndStop(targetFrame);
          }
          else
          {
-            inSprite.gotoAndStop(1);
+            inSprite.stop();
          }
       }
    }

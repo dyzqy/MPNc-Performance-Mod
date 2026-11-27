@@ -24,7 +24,7 @@ Download **[Madness_Project_Nexus.swf](https://github.com/dyzqy/MPNc-Performance
 ## The Difficulties
 Before I started working on this project earnestly and only did changes here and there, I thought lag came from only 2 places: adjustSprite() & checkAttackHit(). And boy did I hope I was right. 
 
-Finding the reason for the lag inside the game right at the start saves you alot of headache, but after day and day of work a realization became apparant... These 2 functions do not contribute to all of the FPS drops in the game. But I still had hope in Adobe Scout. So I asked my friend to turn it on and test it, and then I realized that because the game was written in AS2, it shows no method calls that are the reason for the lag.
+Finding the reason for the lag inside the game right at the start saves you alot of headache, but day after day of work, a realization became apparant... These 2 functions do not contribute to all of the FPS drops in the game. But I still had hope in Adobe Scout. So I asked my friend to turn it on and test it, and then I realized that because the game was written in AS2, it shows no method calls that are the reason for the lag.
 
 And so this is where the real hardship of the project came to be. What is *really* difficult about this project isn't programming the fixes, those can be done with time. It is finding where lag originates from. *That* is what causes the most headache. Finding *where* exactly that pesky code is throwing you off is what separates you from having the day of your life and remaining homeless for the rest of your life. As you already know, 99% of gamblers quit before they win big. 
 
@@ -33,13 +33,14 @@ As time goes on, I will be able to identify more and more bottlenecks, but that 
 AI, even if used as a tool, cannot handle such magnitude of a project either, and fails at the simplest instructions given. Either at finding, or implementing. Which means this mountain of work needs to be manually, with only the slightest help from Artificial Intelligence(not so intelligent however).
 
 ## Current Progress(estimates)
-- adjustSprite(), approximately 40% of its performance improvements are done
+- `adjustSprite()`, approximately **40%** of its performance improvements are done
   - causes lag the more units are present in the room.
-  - getting near enemy units causes lag spikes(might be related to line below)
-  - whenever an enemy unit uses a melee attack, a lag spike is followed.
-- checkAttackHit(), FPS drops when a unit attacks using any type of weapon. About 10% of its performance improvements are done.
+  - `ItemGenerator.setItemSprite()`, **100%** of its performance improvements are done
+    - getting near enemy units causes lag spikes
+- `checkAttackHit()`, FPS drops when a unit attacks using any type of weapon. About 10% of its performance improvements are done.
+  - Whenever an enemy unit uses a melee attack, a lag spike is followed.
 - ???, FPS drops when a unit decides to switch weapons. 0% performance improvements have been done.
-  - NOT caused by adjustSprite()
+  - NOT caused by `adjustSprite()`.
 - ???, FPS drops when entering a new or old room. 0% performance improvements have been done.
 - ???, getting targeted(with the line of death or whatever it is called) causes huge lag spike in only some cases.
 
