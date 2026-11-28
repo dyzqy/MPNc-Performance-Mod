@@ -207,11 +207,12 @@ class MadnessDoors extends MovieClip
             _loc2_ = _loc2_ + 1;
          }
       }
-      if(this.amLocked || this._parent.roomLock || this.myDataRef.myConnection == undefined)
+      // 28/11/2026 dyzqy: No need to go to the same frame when you are already on it! Stops useless gotoAndStop() calls.
+      if((this.amLocked || this._parent.roomLock || this.myDataRef.myConnection == undefined))
       {
-         this.myLock.gotoAndStop(1);
+         if(this.myLock._currentFrame != 1) this.myLock.gotoAndStop(1);
       }
-      else
+      else if(this.myLock._currentFrame != 2)
       {
          this.myLock.gotoAndStop(2);
       }

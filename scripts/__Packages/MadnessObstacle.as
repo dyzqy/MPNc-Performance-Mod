@@ -80,28 +80,34 @@ class MadnessObstacle extends MovieClip
       // 22/11/2026 dyzqy: An obstacle is an immovable object... No need to change its depth every time :)
       //            (TODO) Commented it! Verify it works.
       // MadnessCharacter.setMyDepth(this,this._yscale);
+      // 28/11/2026 dyzqy: Limited gotoAndStop calls to only when they are needed. 
       if(!this.amCover)
       {
          if(this.myDataRef.noClip)
          {
-            this.mySprite.gotoAndStop(2);
+            
             if(this.myDataRef.alreadyClosed && this.mySprite._visible)
             {
                this.mySprite._visible = false;
             }
+            else if(this.mySprite._currentframe != 2)
+            {
+               // 28/11/2026 dyzqy: You only need to set the frame when the sprite is visible
+               this.mySprite.gotoAndStop(2);
+            }
          }
-         else
+         else if(this.mySprite._currentframe != 1)
          {
             this.mySprite.gotoAndStop(1);
          }
       }
       else if(this.myHealth <= 0)
       {
-         this.mySprite.gotoAndStop(3);
+         if(this.mySprite._currentframe != 3) this.mySprite.gotoAndStop(3);
       }
       else if(this.myHealth < this.myHealthMax * 0.5)
       {
-         this.mySprite.gotoAndStop(2);
+         if(this.mySprite._currentframe != 2) this.mySprite.gotoAndStop(2);
       }
       this.myDataRef.myHealth = this.myHealth;
       this.myDataRef.myHoles = this.myHoles;

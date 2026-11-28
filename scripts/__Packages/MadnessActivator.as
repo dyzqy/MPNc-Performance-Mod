@@ -23,12 +23,16 @@ class MadnessActivator extends MovieClip
       this.myType = inDataRef.myType;
       this.gotoAndStop(this.myType);
       this.myAnimation = this.myDataRef.myAnimation;
-      this.mySprite.gotoAndStop(1);
       this.activated = false;
+      // 28/11/2026 dyzqy: Moved this inside the if so as to only call gotoAndStop once incase the first condition is true
       if(this.myDataRef.myEvents.length == 0)
       {
          this.mySprite.gotoAndStop(2);
          this.activated = true;
+      }
+      else
+      {
+         this.mySprite.gotoAndStop(1);
       }
       this._x = inPlaceholder._x;
       this._y = inPlaceholder._y;
@@ -59,15 +63,16 @@ class MadnessActivator extends MovieClip
    }
    function tick()
    {
+      // 28/11/2026 dyzqy: No need to go to the same frame when you are already on it! Stops useless gotoAndStop() calls.
       if(this.returnActive())
       {
          this.activated = false;
-         this.mySprite.gotoAndStop(1);
+         if(this.mySprite._currentFrame != 1) this.mySprite.gotoAndStop(1);
       }
       else
       {
          this.activated = true;
-         this.mySprite.gotoAndStop(2);
+         if(this.mySprite._currentFrame != 2) this.mySprite.gotoAndStop(2);
       }
       MadnessCharacter.setMyDepth(this,this.fakeDepth);
    }

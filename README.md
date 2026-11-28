@@ -19,7 +19,8 @@ Download **[Madness_Project_Nexus.swf](https://github.com/dyzqy/MPNc-Performance
 - Enemies passing through level boundaries
 - Clips of guns ABOVE the gun? (In the original game)
 - AI likes to cling to walls?
-- Enemies facing right will have a default body skin -->
+- Enemies facing right will have a default body skin
+- throwing weapons makes the weapon animation shoot instead of getting thrown -->
 
 ## The Difficulties
 Before I started working on this project earnestly and only did changes here and there, I thought lag came from only 2 places: adjustSprite() & checkAttackHit(). And boy did I hope I was right. 
@@ -43,6 +44,7 @@ AI, even if used as a tool, cannot handle such magnitude of a project either, an
   - NOT caused by `adjustSprite()`.
 - ???, FPS drops when entering a new or old room. 0% performance improvements have been done.
 - ???, getting targeted(with the line of death or whatever it is called) causes huge lag spike in only some cases.
+- ???, the first few frames of specific enemy types dying causes slight fps drop
 
 ## Credits
 - **Main Programmer, Project Lead & Idea**: dyzqy
